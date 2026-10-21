@@ -1,0 +1,1516 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body>
+<title>Parcial Bases de Datos</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Estudio interactivo del primer parcial de Sistemas de Bases de Datos (UCAB): temas, tarjetas, quizzes con diagramas, laboratorios, ejercicios y simulacro.">
+<meta name="color-scheme" content="dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,500&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Consola de estudio nocturna (mismo mundo visual que la página de ciberseguridad), afinada para BD:
+   tinta azulada, ácido lima como acento, cian para diagramas, ámbar para cardinalidades, magenta solo para errores.
+   Diseño de un solo tema oscuro, elegido a propósito. */
+:root {
+  --bg: oklch(0.165 0.022 268);
+  --bg-2: oklch(0.2 0.025 268);
+  --surface: oklch(0.235 0.028 268);
+  --surface-2: oklch(0.285 0.03 268);
+  --line: oklch(0.36 0.03 268);
+  --text: oklch(0.95 0.01 268);
+  --muted: oklch(0.78 0.025 268);
+  --faint: oklch(0.64 0.03 268);
+  --acid: oklch(0.89 0.2 128);
+  --acid-ink: oklch(0.22 0.06 128);
+  --cyan: oklch(0.84 0.12 208);
+  --amber: oklch(0.85 0.15 80);
+  --danger: oklch(0.72 0.2 12);
+  --ok: oklch(0.82 0.18 150);
+  --ok-bg: oklch(0.34 0.09 150 / .5);
+  --bad-bg: oklch(0.34 0.12 12 / .5);
+  --warn-bg: oklch(0.3 0.06 85 / .35);
+  --warn-line: oklch(0.5 0.09 85);
+  --warn-text: oklch(0.94 0.05 85);
+  --head-bg: oklch(0.165 0.022 268 / .9);
+  --grid: oklch(0.3 0.03 268 / .22);
+  --r: 14px;
+  --r-s: 9px;
+  --ease: cubic-bezier(.22, 1, .36, 1);
+  --nav-w: 218px;
+  --gx: max(16px, env(safe-area-inset-left, 0px));
+  --gr: max(16px, env(safe-area-inset-right, 0px));
+  --f-display: "Chakra Petch", "Segoe UI", system-ui, sans-serif;
+  --f-body: "Instrument Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; background: var(--bg); }
+body {
+  margin: 0; min-height: 100vh; background-color: var(--bg); color: var(--text);
+  font: 400 1.0625rem/1.6 var(--f-body);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 44px 44px; background-attachment: fixed;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 40; background: var(--bg); }
+::selection { background: var(--acid); color: var(--acid-ink); }
+:focus-visible { outline: 2px solid var(--acid); outline-offset: 3px; border-radius: 6px; }
+* { scrollbar-width: thin; scrollbar-color: var(--surface-2) transparent; }
+a { color: var(--cyan); text-underline-offset: 3px; }
+code, .mono { font-family: var(--f-mono); font-size: .88em; }
+code { background: var(--bg); border: 1px solid var(--line); padding: .08em .42em; border-radius: 6px; color: var(--acid); overflow-wrap: anywhere; }
+h1, h2, h3 { font-family: var(--f-display); font-weight: 600; line-height: 1.15; margin: 0; text-wrap: balance; letter-spacing: -0.01em; }
+h1 { font-size: clamp(2rem, 4.4vw, 3.2rem); }
+h2 { font-size: clamp(1.45rem, 2.6vw, 1.95rem); }
+h3 { font-size: 1.18rem; }
+p { margin: 0; }
+button { font: inherit; color: inherit; cursor: pointer; }
+[hidden] { display: none !important; }
+.nav .sm, .brand-text .sm { display: none; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.faint { color: var(--faint); }
+
+.app { display: grid; grid-template-columns: var(--nav-w) minmax(0, 1fr); grid-template-rows: auto 1fr; min-height: 100vh; }
+
+/* ---------- Header ---------- */
+.top {
+  grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  padding-block: .85rem; padding-left: var(--gx); padding-right: var(--gr); border-bottom: 1px solid var(--line);
+  background: var(--head-bg); backdrop-filter: blur(10px); position: sticky; top: env(safe-area-inset-top, 0px); z-index: 30;
+}
+.brand { display: flex; align-items: center; gap: .75rem; text-decoration: none; color: var(--text); min-width: 0; }
+.brand-mark { width: 2.4rem; height: 2.4rem; display: grid; place-items: center; background: var(--acid); color: var(--acid-ink); border-radius: 10px; flex: none; }
+.brand-mark svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.brand-text { font: 600 1.05rem/1.1 var(--f-display); display: flex; flex-direction: column; min-width: 0; }
+.brand-text small { font: 400 .78rem var(--f-body); color: var(--muted); margin-top: .2rem; }
+.top-right { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; justify-content: flex-end; }
+.clock, .xp { font: 600 .88rem var(--f-mono); font-variant-numeric: tabular-nums; padding: .42rem .75rem; border: 1px solid var(--line); border-radius: 999px; background: var(--bg-2); color: var(--text); white-space: nowrap; }
+.clock b { color: var(--amber); font-weight: 600; }
+.xp b { color: var(--acid); font-weight: 600; }
+
+/* ---------- Nav ---------- */
+.nav { padding: 1.1rem .8rem; display: flex; flex-direction: column; gap: .2rem; position: sticky; top: calc(4.1rem + env(safe-area-inset-top, 0px)); align-self: start; padding-left: max(.8rem, env(safe-area-inset-left, 0px)); }
+.nav a { display: flex; align-items: center; gap: .75rem; padding: .7rem .85rem; border-radius: var(--r-s); color: var(--muted); text-decoration: none; font-weight: 500; transition: background .2s var(--ease), color .2s var(--ease); }
+.nav a:hover { background: var(--surface); color: var(--text); }
+.nav a[aria-current="page"] { background: var(--surface-2); color: var(--text); }
+.nav a[aria-current="page"] svg { stroke: var(--acid); }
+.nav svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+
+/* ---------- Main ---------- */
+main { padding-block: clamp(1.25rem, 3.4vw, 2.6rem) 5rem; padding-left: max(var(--gx), clamp(1rem, 3.4vw, 2.6rem)); padding-right: max(var(--gr), clamp(1rem, 3.4vw, 2.6rem)); max-width: 1080px; width: 100%; outline: none; min-width: 0; }
+.view-in { animation: rise .5s var(--ease) both; }
+@keyframes rise { from { opacity: .3; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+.lead { color: var(--muted); max-width: 64ch; margin-top: .7rem; font-size: 1.08rem; }
+.eyebrow { font: 600 .78rem var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--cyan); margin-bottom: .6rem; }
+.sub { color: var(--muted); margin-top: .35rem; }
+
+/* ---------- Botones y campos ---------- */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; padding: .7rem 1.15rem; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); font-weight: 600; transition: transform .15s var(--ease), background .2s, border-color .2s; min-height: 44px; text-decoration: none; color: var(--text); }
+.btn:hover { background: var(--surface-2); border-color: var(--faint); }
+.btn:active { transform: translateY(1px); }
+.btn.primary { background: var(--acid); color: var(--acid-ink); border-color: var(--acid); }
+.btn.ghost { background: transparent; }
+.btn.danger { border-color: var(--danger); color: var(--danger); background: transparent; }
+.btn[disabled] { opacity: .45; pointer-events: none; }
+.row { display: flex; gap: .7rem; flex-wrap: wrap; align-items: center; }
+.sp { flex: 1; }
+select, input[type="search"] { font: inherit; color: var(--text); background: var(--bg-2); border: 1px solid var(--line); border-radius: 10px; padding: .65rem .9rem; min-height: 44px; max-width: 100%; }
+label.field { display: grid; gap: .35rem; color: var(--muted); font-size: .92rem; }
+
+/* ---------- Inicio ---------- */
+.hero { padding: clamp(1.2rem, 4vw, 2.4rem) 0 1.4rem; }
+.hero h1 em { font-style: normal; color: var(--acid); }
+.hero .when { display: inline-flex; gap: .7rem; align-items: baseline; margin-top: 1.5rem; flex-wrap: wrap; }
+.bigtime { font: 600 clamp(2.2rem, 7vw, 4.2rem)/1 var(--f-mono); font-variant-numeric: tabular-nums; letter-spacing: -0.03em; color: var(--text); }
+.bigtime i { font: 500 .32em var(--f-body); color: var(--muted); font-style: normal; margin: 0 .5em 0 .12em; letter-spacing: 0; }
+.next-box { margin-top: 1.6rem; padding: 1.1rem 1.25rem; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+.next-box p { flex: 1 1 240px; color: var(--muted); }
+.next-box p b { color: var(--text); }
+.parts { margin-top: 2.2rem; }
+.part-list { list-style: none; counter-reset: p; padding: 0; margin: 1rem 0 0; display: grid; gap: .5rem; }
+.part-list li { counter-increment: p; display: flex; gap: 1rem; align-items: center; padding: .75rem 1rem; background: var(--bg-2); border: 1px solid var(--line); border-radius: var(--r-s); }
+.part-list li::before { content: counter(p); font: 700 1.05rem var(--f-mono); color: var(--acid); width: 1.6rem; flex: none; }
+.part-list li > div { flex: 1; min-width: 0; }
+.part-list small { display: block; color: var(--faint); font-size: .86rem; }
+.mission { margin-top: 2.4rem; border-top: 1px solid var(--line); padding-top: 1.4rem; }
+.mrow { display: grid; grid-template-columns: minmax(0, 1fr) 170px auto; gap: 1.2rem; align-items: center; padding: 1.1rem .2rem; border-bottom: 1px solid var(--line); }
+.mrow h3 { display: flex; gap: .6rem; align-items: baseline; }
+.mrow .num { font: 600 .85rem var(--f-mono); color: var(--hue-c); }
+.mrow small { display: block; color: var(--faint); margin-top: .15rem; font-size: .84rem; }
+.mrow .bl { color: var(--muted); font-size: .95rem; margin-top: .3rem; max-width: 62ch; }
+.meter { height: 8px; background: var(--bg-2); border-radius: 999px; overflow: hidden; border: 1px solid var(--line); }
+.meter > i { display: block; height: 100%; width: 0; background: var(--hue-c, var(--acid)); border-radius: 999px; transition: width .9s var(--ease); }
+.mpct { font: 600 .82rem var(--f-mono); color: var(--muted); margin-top: .35rem; font-variant-numeric: tabular-nums; }
+.mrow .go { display: flex; gap: .45rem; flex-wrap: wrap; justify-content: flex-end; }
+.mini { padding: .45rem .8rem; min-height: 38px; font-size: .9rem; }
+.tips { margin-top: 2.4rem; display: grid; gap: .6rem; }
+.tips h2 { margin-bottom: .6rem; }
+.tip-line { padding: .8rem 1rem; background: var(--bg-2); border-radius: var(--r-s); color: var(--muted); }
+.tip-line b { color: var(--amber); font-family: var(--f-mono); font-weight: 600; margin-right: .4rem; }
+.import { margin-top: 2rem; padding: 1.1rem 1.25rem; border: 1px dashed var(--line); border-radius: var(--r); color: var(--muted); display: flex; flex-wrap: wrap; gap: .8rem; align-items: center; }
+
+/* ---------- Estudiar ---------- */
+.study { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 2rem; margin-top: 1.4rem; align-items: start; }
+.mcol { min-width: 0; }
+.mods { display: grid; gap: .3rem; position: sticky; top: calc(5rem + env(safe-area-inset-top, 0px)); }
+.mods button { text-align: left; background: transparent; border: 1px solid transparent; border-radius: 10px; padding: .65rem .8rem; color: var(--muted); display: grid; gap: .15rem; transition: background .2s, color .2s; }
+.mods button:hover { background: var(--surface); color: var(--text); }
+.mods button[aria-pressed="true"] { background: var(--surface-2); color: var(--text); border-color: var(--line); }
+.mods button small { color: var(--faint); font-size: .78rem; font-family: var(--f-mono); }
+.mods .m-meter { margin-top: .3rem; }
+.mod-head p { color: var(--muted); max-width: 64ch; margin-top: .4rem; }
+.mod-head .src { display: block; margin-top: .4rem; color: var(--faint); font: 500 .8rem var(--f-mono); }
+.concept { padding: 1.4rem 0 1.5rem; border-bottom: 1px solid var(--line); }
+.concept h3 { display: flex; gap: .75rem; align-items: flex-start; justify-content: space-between; }
+.concept .body, .ej .body { margin-top: .7rem; color: var(--text); max-width: 72ch; }
+.concept .body b, .concept li b { color: var(--acid); font-weight: 600; }
+.concept ul { margin: .7rem 0 0; padding-left: 1.2rem; max-width: 72ch; }
+.concept li { margin: .38rem 0; padding-left: .2rem; }
+.concept li::marker { color: var(--faint); }
+.callout { margin-top: .9rem; padding: .8rem 1rem; background: var(--warn-bg); border: 1px solid var(--warn-line); border-radius: var(--r-s); max-width: 72ch; color: var(--warn-text); }
+.chk { flex: none; display: inline-flex; align-items: center; gap: .45rem; font: 500 .85rem var(--f-body); color: var(--muted); padding: .35rem .7rem; border: 1px solid var(--line); border-radius: 999px; background: var(--bg-2); white-space: nowrap; margin-top: .1rem; }
+.chk svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; opacity: .35; }
+.chk[aria-pressed="true"] { color: var(--acid-ink); background: var(--acid); border-color: var(--acid); }
+.chk[aria-pressed="true"] svg { opacity: 1; }
+.toolbar { display: flex; gap: .8rem; flex-wrap: wrap; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+.toolbar input { flex: 1 1 220px; }
+
+/* ---------- Figuras ---------- */
+.fig { margin: .4rem 0 1.2rem; padding: 1rem; background: var(--bg); border: 1px solid var(--line); border-radius: var(--r); overflow-x: auto; display: flex; justify-content: center; }
+.fig.fig-t { display: block; }
+.fig-svg { width: 100%; height: auto; display: block; }
+.f-ent { fill: var(--surface); stroke: var(--cyan); stroke-width: 1.6; }
+.f-ent.in { fill: none; }
+.f-ent.ext { stroke-dasharray: 5 4; }
+.f-rel { fill: var(--bg-2); stroke: var(--cyan); stroke-width: 1.6; }
+.f-rel.in { fill: none; }
+.f-ln { stroke: var(--muted); stroke-width: 1.4; }
+.f-sub { fill: none; stroke: var(--muted); stroke-width: 1.6; }
+.f-circ { fill: var(--surface); stroke: var(--cyan); stroke-width: 1.6; }
+.f-et { fill: var(--text); font: 600 14px var(--f-display); text-anchor: middle; dominant-baseline: central; }
+.f-rt { fill: var(--muted); font: italic 500 13px var(--f-body); text-anchor: middle; dominant-baseline: central; }
+.f-ct { fill: var(--acid); font: 700 15px var(--f-mono); text-anchor: middle; dominant-baseline: central; }
+.f-card { fill: var(--amber); font: 600 13px var(--f-mono); }
+.tbls { display: flex; flex-wrap: wrap; gap: 1rem; }
+.mini-t { flex: 1 1 240px; min-width: 0; }
+.mini-t table { min-width: 0; font-size: .9rem; }
+.mini-t caption { text-align: left; font: 600 .86rem var(--f-mono); color: var(--cyan); padding: .5rem .8rem; caption-side: top; }
+.mini-t td, .mini-t th { padding: .45rem .7rem; font-family: var(--f-mono); font-size: .84rem; }
+.mini-t td:first-child { font-weight: 500; }
+td.nul { color: var(--faint); font-style: italic; }
+.ddl { margin: 0 0 1rem; padding: .9rem 1rem; background: var(--bg-2); border: 1px solid var(--line); border-radius: var(--r-s); font: 400 .84rem/1.5 var(--f-mono); color: var(--text); overflow-x: auto; white-space: pre; }
+.ddl-box summary { cursor: pointer; color: var(--muted); font-weight: 600; margin-bottom: .6rem; }
+
+/* ---------- Tarjetas ---------- */
+.deck-stage { margin: 1.6rem auto 1rem; max-width: 640px; perspective: 1400px; }
+.flip { position: relative; min-height: 320px; width: 100%; background: none; border: 0; padding: 0; text-align: left; display: block; }
+.flip-in { position: relative; min-height: 320px; transform-style: preserve-3d; transition: transform .6s var(--ease); }
+.flip[aria-pressed="true"] .flip-in { transform: rotateY(180deg); }
+.face { position: absolute; inset: 0; backface-visibility: hidden; padding: clamp(1.4rem, 4vw, 2.2rem); border-radius: 20px; border: 1px solid var(--line); background: var(--surface); display: flex; flex-direction: column; justify-content: center; gap: .9rem; }
+.face .tag { font: 600 .8rem var(--f-mono); color: var(--faint); }
+.face .big { font: 600 clamp(1.25rem, 3.4vw, 1.7rem)/1.3 var(--f-display); text-wrap: balance; }
+.face.back { transform: rotateY(180deg); background: var(--surface-2); border-color: var(--acid); }
+.face.back .big { font-family: var(--f-body); font-weight: 500; font-size: clamp(1.08rem, 2.8vw, 1.3rem); line-height: 1.5; }
+.hint { color: var(--faint); font-size: .88rem; text-align: center; margin-top: .6rem; }
+.hint b { color: var(--text); }
+.deck-bar { max-width: 640px; margin: 0 auto; display: grid; gap: .6rem; }
+.deck-bar .row { justify-content: center; }
+.deck-count { text-align: center; font: 600 .9rem var(--f-mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+kbd { font: 500 .78rem var(--f-mono); padding: .1rem .4rem; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 5px; background: var(--bg-2); color: var(--muted); }
+
+/* ---------- Quiz ---------- */
+.q-card { margin-top: 1.4rem; padding: clamp(1.1rem, 3vw, 1.8rem); border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); }
+.q-meta { display: flex; justify-content: space-between; gap: 1rem; color: var(--muted); font: 500 .88rem var(--f-mono); font-variant-numeric: tabular-nums; flex-wrap: wrap; }
+.q-text { font: 600 clamp(1.15rem, 2.8vw, 1.5rem)/1.35 var(--f-display); margin: 1rem 0 1.1rem; text-wrap: balance; }
+.opts { display: grid; gap: .6rem; }
+.opt { display: grid; grid-template-columns: 2rem 1fr; gap: .6rem; align-items: start; text-align: left; padding: .85rem 1rem; background: var(--bg-2); border: 1px solid var(--line); border-radius: 12px; transition: border-color .15s, background .15s, transform .15s var(--ease); min-height: 52px; }
+.opt > span:last-child { min-width: 0; overflow-wrap: anywhere; }
+.opt:hover { border-color: var(--faint); background: var(--surface-2); }
+.opt .l { font: 600 .9rem var(--f-mono); color: var(--faint); padding-top: .12rem; }
+.opt.picked { border-color: var(--cyan); }
+.opt.right { background: var(--ok-bg); border-color: var(--ok); }
+.opt.wrong { background: var(--bad-bg); border-color: var(--danger); animation: nudge .4s var(--ease); }
+.opt[disabled] { cursor: default; }
+@keyframes nudge { 20% { transform: translateX(-5px); } 60% { transform: translateX(4px); } }
+.why { margin-top: 1rem; padding: .9rem 1rem; border-radius: var(--r-s); background: var(--bg-2); color: var(--muted); }
+.why b { color: var(--text); }
+.score-big { font: 700 clamp(3rem, 10vw, 5.4rem)/1 var(--f-display); color: var(--acid); font-variant-numeric: tabular-nums; }
+.score-big small { font-size: .32em; color: var(--muted); font-weight: 500; }
+.miss { margin-top: 1.6rem; display: grid; gap: .9rem; }
+.miss-item { padding: 1rem 1.1rem; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-s); min-width: 0; }
+.miss-item p { margin-top: .35rem; color: var(--muted); }
+.miss-item .ok { color: var(--ok); }
+.miss-item .no { color: var(--danger); }
+.miss-item .fig { margin-top: .8rem; }
+.setup-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 1rem; margin-top: 1.4rem; align-items: end; }
+.streak { color: var(--amber); font-weight: 600; }
+.timer-bar { height: 6px; background: var(--bg-2); border-radius: 999px; overflow: hidden; margin-top: .7rem; }
+.timer-bar i { display: block; height: 100%; background: var(--amber); transition: width 1s linear; }
+
+/* ---------- Laboratorio ---------- */
+.tabs { display: flex; gap: .4rem; flex-wrap: wrap; margin-top: 1.4rem; padding-bottom: .9rem; border-bottom: 1px solid var(--line); }
+.tab { padding: .55rem .95rem; border: 1px solid transparent; border-radius: 999px; background: transparent; color: var(--muted); font-weight: 500; min-height: 40px; }
+.tab:hover { color: var(--text); background: var(--surface); }
+.tab[aria-selected="true"] { background: var(--surface-2); color: var(--text); border-color: var(--line); }
+.lab-body { margin-top: 1.6rem; }
+.term { background: var(--bg); border: 1px solid var(--line); border-radius: var(--r); padding: 1rem 1.2rem; font: 400 1rem/1.6 var(--f-mono); overflow-x: auto; color: var(--acid); margin-top: .8rem; }
+.term .cur { display: inline-block; width: .55em; height: 1.05em; background: var(--acid); vertical-align: -.18em; animation: blink 1.1s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+.chips { display: flex; gap: .45rem; flex-wrap: wrap; margin-top: .5rem; }
+.chip { font: 500 .9rem var(--f-body); padding: .5rem .8rem; background: var(--bg-2); border: 1px solid var(--line); border-radius: 9px; min-height: 40px; transition: background .15s, border-color .15s, color .15s; text-align: left; }
+.chip.mono { font-family: var(--f-mono); font-size: .88rem; }
+.chip:hover { border-color: var(--faint); }
+.chip[aria-pressed="true"] { background: var(--acid); color: var(--acid-ink); border-color: var(--acid); }
+.mission-q { padding: 1rem 1.15rem; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); }
+.verdict { margin-top: .9rem; padding: .8rem 1rem; border-radius: var(--r-s); font-weight: 500; display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; }
+.verdict.good { background: var(--ok-bg); color: var(--text); }
+.verdict.bad { background: var(--bad-bg); color: var(--text); }
+.seq-ans { list-style: none; margin: 1rem 0 0; padding: 0; display: grid; gap: .45rem; counter-reset: s; }
+.seq-ans li { counter-increment: s; display: flex; align-items: center; gap: .8rem; min-height: 46px; padding: .45rem .9rem; border-radius: 11px; border: 1px dashed var(--line); color: var(--faint); background: var(--bg-2); font-family: var(--f-mono); font-size: .92rem; overflow-wrap: anywhere; }
+.seq-ans li::before { content: counter(s); font: 600 .85rem var(--f-mono); color: var(--faint); width: 1.4rem; flex: none; }
+.seq-ans li.filled { border-style: solid; color: var(--text); background: var(--surface-2); cursor: pointer; }
+.seq-ans li.ok { border-color: var(--ok); background: var(--ok-bg); }
+.seq-ans li.ko { border-color: var(--danger); background: var(--bad-bg); }
+.seq-pool { margin-top: 1rem; }
+.cl-item { font: 600 clamp(1.15rem, 3vw, 1.5rem)/1.35 var(--f-display); padding: 1.4rem; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); text-wrap: balance; }
+.cl-btns { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .6rem; margin-top: 1rem; }
+.pairs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.pairs-col { display: grid; gap: .5rem; align-content: start; }
+.pair-btn { text-align: left; padding: .7rem .9rem; min-height: 48px; background: var(--bg-2); border: 1px solid var(--line); border-radius: 11px; transition: all .2s var(--ease); overflow-wrap: anywhere; }
+.pair-btn:hover { border-color: var(--faint); }
+.pair-btn.sel { border-color: var(--cyan); background: var(--surface-2); }
+.pair-btn.done { border-color: var(--ok); background: var(--ok-bg); pointer-events: none; }
+.pair-btn.bad { border-color: var(--danger); animation: nudge .4s var(--ease); }
+.ops { display: grid; gap: .7rem; margin-top: .4rem; }
+.op { padding: .85rem 1rem; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-s); display: grid; gap: .6rem; min-width: 0; }
+.op.good { border-color: var(--ok); }
+.op.bad { border-color: var(--danger); }
+.op code.sql { display: block; white-space: pre-wrap; background: var(--bg); padding: .5rem .7rem; color: var(--cyan); }
+.op select { width: 100%; }
+.op-res { color: var(--muted); }
+.op-res b { color: var(--text); }
+
+/* ---------- Ejercicios ---------- */
+.ej-list { display: grid; gap: 1.2rem; margin-top: 1.6rem; }
+.ej { padding: 1.3rem 1.4rem; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); min-width: 0; }
+.ej h3 { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; }
+.ej .fig { margin-top: 1rem; }
+.sol { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: .9rem; }
+.sol summary { cursor: pointer; font-weight: 600; color: var(--acid); }
+.sol-in { margin-top: .8rem; color: var(--text); max-width: 76ch; }
+.sol-in ul, .sol-in ol { padding-left: 1.2rem; margin: .5rem 0; }
+.sol-in li { margin: .4rem 0; }
+.sol-in p { margin: .6rem 0; }
+.sol-in b { color: var(--acid); }
+.pill { display: inline-block; padding: .15rem .6rem; border-radius: 999px; background: var(--bg-2); border: 1px solid var(--line); font: 500 .8rem var(--f-mono); color: var(--muted); }
+.pill.p-ok { color: var(--ok); border-color: var(--ok); }
+.pill.p-rep { color: var(--danger); border-color: var(--danger); }
+
+/* ---------- Chuleta ---------- */
+.cheat { margin-top: 1.8rem; }
+.cheat h2 { font-size: 1.3rem; margin-bottom: .7rem; }
+.tbl-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); }
+table { border-collapse: collapse; width: 100%; min-width: 480px; }
+th, td { text-align: left; padding: .7rem .95rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font: 600 .88rem var(--f-display); color: var(--acid); background: var(--bg-2); }
+tr:last-child td { border-bottom: 0; }
+td:first-child { font-weight: 600; color: var(--text); }
+td { color: var(--muted); }
+.empty { padding: 1.4rem; text-align: center; color: var(--muted); border: 1px dashed var(--line); border-radius: var(--r); }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 860px) {
+  .app { grid-template-columns: minmax(0, 1fr); }
+  .nav {
+    position: fixed; bottom: 0; left: 0; right: 0; top: auto; z-index: 40; flex-direction: row;
+    padding: .35rem max(.4rem, env(safe-area-inset-right, 0px)) calc(.35rem + env(safe-area-inset-bottom, 0px)) max(.4rem, env(safe-area-inset-left, 0px));
+    background: var(--head-bg); backdrop-filter: blur(10px); border-top: 1px solid var(--line); justify-content: space-between; gap: 0; overflow-x: auto;
+  }
+  .nav a { flex-direction: column; gap: .15rem; padding: .4rem .45rem; font-size: .66rem; min-width: 3.3rem; flex: 1; align-items: center; }
+  main { padding-bottom: calc(6rem + env(safe-area-inset-bottom, 0px)); }
+  .study { grid-template-columns: minmax(0, 1fr); gap: 1rem; }
+  .mods { position: static; grid-auto-flow: column; grid-auto-columns: 210px; overflow-x: auto; padding-bottom: .4rem; }
+  .mrow { grid-template-columns: minmax(0, 1fr); gap: .7rem; }
+  .mrow .go { justify-content: flex-start; }
+  .brand-text small { display: none; }
+  .nav .lg { display: none; } .nav .sm { display: inline; }
+  .nav a { font-size: .68rem; padding: .4rem .2rem; min-width: 0; }
+  .cl-btns { grid-template-columns: minmax(0, 1fr); }
+  .pairs { gap: .6rem; }
+  .part-list li { flex-wrap: wrap; }
+}
+@media (max-width: 480px) { .xp { display: none; } .brand-text .lg { display: none; } .brand-text .sm { display: inline; } .clock { font-size: .78rem; padding: .38rem .6rem; } .brand-mark { width: 2.1rem; height: 2.1rem; } .pair-btn { font-size: .9rem; } }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+  .flip[aria-pressed="true"] .flip-in { transform: none; }
+  .face.back { transform: none; }
+  .flip[aria-pressed="false"] .face.back, .flip[aria-pressed="true"] .face.front { visibility: hidden; }
+}
+
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2zM4 19V5M9 7h6M9 11h6"/></symbol>
+    <symbol id="i-cards" viewBox="0 0 24 24"><rect x="3" y="7" width="14" height="13" rx="2"/><path d="M7 7V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-2"/></symbol>
+    <symbol id="i-quiz" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.6 2.2c-.7.4-1.1.9-1.1 1.8M12 17h.01"/></symbol>
+    <symbol id="i-lab" viewBox="0 0 24 24"><path d="M9 3h6M10 3v6l-5.5 9.5A2 2 0 0 0 6.2 21h11.6a2 2 0 0 0 1.7-2.5L14 9V3M7.5 15h9"/></symbol>
+    <symbol id="i-pen" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4"/></symbol>
+    <symbol id="i-timer" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></symbol>
+    <symbol id="i-sheet" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M4 9h16M4 15h16M10 9v12"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7"/></symbol>
+    <symbol id="i-db" viewBox="0 0 24 24"><ellipse cx="12" cy="5.5" rx="7" ry="2.8"/><path d="M5 5.5v13c0 1.5 3.1 2.8 7 2.8s7-1.3 7-2.8v-13M5 12c0 1.5 3.1 2.8 7 2.8s7-1.3 7-2.8"/></symbol>
+  </defs>
+</svg>
+
+<div class="app">
+  <header class="top">
+    <a class="brand" href="#inicio" aria-label="Inicio">
+      <span class="brand-mark" aria-hidden="true"><svg><use href="#i-db"/></svg></span>
+      <span class="brand-text"><span class="lg">Sistemas de Bases de Datos</span><span class="sm">Bases de Datos</span><small>INFO-02012 · modo parcial</small></span>
+    </a>
+    <div class="top-right">
+      <div class="clock" id="clock" role="timer" aria-live="off" title="Cuenta regresiva al primer parcial: lunes 26 de octubre, 1:00 p.m."></div>
+      <div class="xp" id="xp" title="Puntos de experiencia"></div>
+    </div>
+  </header>
+
+  <nav class="nav" id="nav" aria-label="Secciones">
+    <a href="#inicio" data-r="inicio"><svg><use href="#i-home"/></svg><span class="lg">Inicio</span><span class="sm">Inicio</span></a>
+    <a href="#estudiar" data-r="estudiar"><svg><use href="#i-book"/></svg><span class="lg">Estudiar</span><span class="sm">Leer</span></a>
+    <a href="#tarjetas" data-r="tarjetas"><svg><use href="#i-cards"/></svg><span class="lg">Tarjetas</span><span class="sm">Tarjetas</span></a>
+    <a href="#quiz" data-r="quiz"><svg><use href="#i-quiz"/></svg><span class="lg">Quiz</span><span class="sm">Quiz</span></a>
+    <a href="#lab" data-r="lab"><svg><use href="#i-lab"/></svg><span class="lg">Laboratorio</span><span class="sm">Lab</span></a>
+    <a href="#ejercicios" data-r="ejercicios"><svg><use href="#i-pen"/></svg><span class="lg">Ejercicios</span><span class="sm">Ejercicios</span></a>
+    <a href="#simulacro" data-r="simulacro"><svg><use href="#i-timer"/></svg><span class="lg">Simulacro</span><span class="sm">Simulacro</span></a>
+    <a href="#chuleta" data-r="chuleta"><svg><use href="#i-sheet"/></svg><span class="lg">Chuleta</span><span class="sm">Chuleta</span></a>
+  </nav>
+
+  <main id="view" tabindex="-1"></main>
+</div>
+
+<script>
+/* Contenido de estudio. Fuentes: láminas de la Prof. Goncalves (Introducción, Criterios, Notación),
+   "Un Lenguaje Lógico para Restricciones Explícitas", Práctica ER, enunciado del proyecto y
+   Elmasri & Navathe (cap. 3, 4, 5 y 9) para modelo relacional y traducción.
+   Las preguntas guardan SIEMPRE la respuesta correcta en la posición 0; la app mezcla al mostrar.
+   Formato de pregunta: [enunciado, [opciones], explicación, figura opcional]. */
+
+window.EXAM_DATE = new Date("2026-10-26T13:00:00-04:00");
+
+window.MODULES = [
+  /* ============================================================ 1 */
+  {
+    id: "fund", name: "Fundamentos de BD", src: "Unidad I · Introducción (láminas 20-35)", hue: 205,
+    blurb: "Datos, esquema vs. diagrama, BD / SGBD / SBD, modelo de datos, archivos vs. BD, usuarios, lenguajes, ventajas, ANSI-SPARC y metodología.",
+    concepts: [
+      { t: "Datos", p: "Los <b>datos</b> son un conjunto de hechos conocidos con significado explícito para quien los usa y que reflejan el <b>estado actual de la realidad</b>.", list: ["Propiedades que se le piden a los datos en una BD: <b>persistencia</b>, <b>disponibilidad</b>, <b>consistencia</b> (cumplen las reglas del mini-mundo), <b>seguridad</b> y <b>confiabilidad</b>."] },
+      { t: "Esquema, diagrama, BD, SGBD y SBD", p: "Cinco términos que la profesora separa con cuidado:", list: ["<b>Esquema de datos</b>: especificación de las propiedades que satisfacen los elementos de un mini-mundo (universo de discurso).", "<b>Esquema</b>: representación de un problema usando un <b>modelo de datos</b>. <b>Diagrama</b>: representación <b>gráfica</b> de un esquema.", "<b>Base de datos</b>: conjunto de datos relacionados entre sí que representan los elementos protagonistas de un mini-mundo.", "<b>Gestor (SGBD)</b>: software que permite crear, mantener y operar sobre BBDD.", "<b>Sistema de BD (SBD)</b>: el conjunto de aplicaciones + SGBD + datos + metadatos."], tip: "Esquema ≠ diagrama. El diagrama es solo el dibujo; el esquema es la representación (con sus restricciones)." },
+      { t: "Modelo de datos", p: "Herramienta conceptual para describir las características, propiedades y estructura de los entes de un mini-mundo. Tiene tres componentes: <b>estructuras</b>, <b>restricciones</b> y <b>operaciones</b>.", list: ["Restricciones <b>inherentes</b>: las impone el propio modelo (en el relacional no hay atributos multivaluados).", "Restricciones <b>implícitas</b>: se expresan con las estructuras del esquema (claves, (min,max), participación total, entidades débiles).", "Restricciones <b>explícitas</b>: no caben en el diagrama y se escriben aparte, en lenguaje natural y LPO."] },
+      { t: "Clasificaciones de modelos", p: "Tres formas de clasificar un modelo de datos:", list: ["Por nivel: <b>alto nivel / conceptual / semántico</b> (ER), <b>implementación / lógico / tradicional</b> (relacional) y <b>bajo nivel / físico</b>.", "Por identificación: <b>por valores</b> (relacional: una tupla se identifica por el valor de su clave) o <b>por existencia</b> (objetos con OID).", "Por estructura: <b>estructurados</b>, <b>semi-estructurados</b> (JSON, XML) y <b>no estructurados</b>."] },
+      { t: "Procesamiento de archivos vs. bases de datos", p: "En el procesamiento de datos la unidad de trabajo es el <b>archivo</b> y el acceso lo da un lenguaje de propósito específico con primitivas de E/S del SO. En una BD la unidad de trabajo es la <b>BD</b> y el acceso lo provee el <b>SGBD</b>.", list: ["Sistema de procesamiento de datos = el software que manipula los archivos.", "SBD = aplicaciones + SGBD + datos + metadatos."] },
+      { t: "Usuarios y lenguajes", p: "Actores alrededor de una BD y los lenguajes que ofrece un SGBD.", list: ["<b>DBA</b> (administra recursos, seguridad, rendimiento), <b>diseñadores</b> de BD, <b>analistas y programadores</b> de aplicaciones, <b>usuarios finales</b> (casuales, paramétricos o rutinarios, sofisticados).", "<b>DDL</b>: define la estructura (CREATE, ALTER, DROP). <b>DML</b>: manipula los datos (SELECT, INSERT, UPDATE, DELETE). <b>DCL</b>: controla seguridad y permisos (GRANT, REVOKE)."] },
+      { t: "Ventajas de un SBD", p: "Lista de la lámina 29:", list: ["<b>Control de redundancia</b> (la lámina dice «Redundancia», pero se refiere a controlarla).", "Completitud de información, <b>independencia programas/datos</b>, abstracción de datos, soporte de visiones (vistas).", "Facilidad de desarrollo y mantenimiento, acceso eficiente, ejecución eficiente de consultas.", "<b>Consistencia</b>, <b>concurrencia</b> y <b>recuperación ante fallas</b>."] },
+      { t: "Cuándo NO usar un SGBD", p: "Costos: alta inversión inicial (hardware, software, entrenamiento), costo de la generalidad del sistema y sobrecarga por seguridad, concurrencia, recuperación e integridad.", list: ["Conviene una solución a la medida si la aplicación es <b>simple, bien definida y sin cambios</b>, hay <b>tiempo real estricto</b>, es un <b>sistema embebido</b> con poco almacenamiento o <b>no hay acceso multiusuario</b>.", "Ejemplos con gestores propietarios: <b>CAD</b>, conmutación y <b>telecomunicaciones</b>, <b>GIS</b>."] },
+      { t: "Arquitectura ANSI-SPARC (3 niveles)", p: "Separa la visión de los usuarios del almacenamiento físico.", list: ["Nivel <b>externo</b>: las vistas de cada grupo de usuarios.", "Nivel <b>conceptual</b>: la estructura de toda la BD (entidades, tipos, relaciones, restricciones).", "Nivel <b>interno</b>: cómo se almacena físicamente.", "Mapeo externo↔conceptual da <b>independencia lógica</b>; mapeo conceptual↔interno da <b>independencia física</b>."], tip: "La independencia lógica es más difícil de lograr que la física." },
+      { t: "Tipos de sistemas de bases de datos", p: "Formas comunes de clasificar un SBD:", list: ["Por <b>modelo de datos</b>: relacional (el más usado), orientado a objetos, objeto-relacional, y NoSQL (documentos, clave-valor, columnar, grafos).", "Por <b>número de usuarios</b>: monousuario o multiusuario.", "Por <b>distribución</b>: centralizado (datos en un solo sitio) o distribuido (datos repartidos en varios sitios conectados por red; homogéneo o heterogéneo).", "Por <b>arquitectura</b>: centralizada, cliente-servidor (dos o tres capas) o en la nube.", "Por <b>propósito</b>: de propósito general o específico (GIS, CAD, telecomunicaciones); y transaccional (OLTP) o analítico (OLAP, data warehouse)."], tip: "La lámina 37 remite al ranking de DB-Engines: la mayoría de los SGBD más usados siguen siendo relacionales." },
+      { t: "Metodología de diseño", p: "Ciclo para construir una BD: <b>recolección y análisis de requisitos → diseño conceptual (ER/ERE) → diseño lógico (relacional) → diseño físico → implantación</b>. El diseño conceptual es independiente del SGBD; el lógico ya depende del modelo de implementación." }
+    ],
+    cards: [
+      ["¿Qué son los datos según la profesora?", "Hechos conocidos con significado explícito para quien los usa, que reflejan el estado actual de la realidad."],
+      ["Diferencia entre esquema y diagrama", "El esquema representa un problema usando un modelo de datos; el diagrama es la representación gráfica de ese esquema."],
+      ["¿Qué incluye un SBD?", "Las aplicaciones, el SGBD, los datos y los metadatos."],
+      ["Tres componentes de un modelo de datos", "Estructuras, restricciones y operaciones."],
+      ["Tres tipos de restricciones", "Inherentes (del modelo), implícitas (en las estructuras del esquema) y explícitas (aparte, en LPO)."],
+      ["Modelo con identificación por valores vs. por existencia", "Por valores: el valor de la clave identifica (relacional). Por existencia: cada objeto tiene un identificador propio (OID)."],
+      ["DDL, DML y DCL", "DDL define estructura, DML manipula datos, DCL controla seguridad/permisos."],
+      ["¿Qué da el mapeo conceptual↔interno?", "Independencia física de datos."],
+      ["¿Qué da el mapeo externo↔conceptual?", "Independencia lógica de datos."],
+      ["Cuatro casos donde NO conviene un SGBD", "Aplicación simple y estable, tiempo real estricto, sistema embebido con poco almacenamiento, sin acceso multiusuario."],
+      ["Unidad de trabajo en archivos vs. en BD", "Archivos: el archivo. BD: la base de datos completa, accedida a través del SGBD."],
+      ["SBD centralizado vs. distribuido", "Centralizado: los datos están en un solo sitio. Distribuido: repartidos en varios sitios conectados por red."],
+      ["OLTP vs. OLAP", "OLTP: muchas transacciones cortas del día a día. OLAP: consultas analíticas sobre grandes volúmenes (data warehouse)."]
+    ],
+    quiz: [
+      ["¿Cuál es la diferencia correcta entre esquema y diagrama?", ["El diagrama es la representación gráfica de un esquema", "Son sinónimos", "El esquema es la parte gráfica y el diagrama la textual", "El diagrama incluye las restricciones explícitas y el esquema no"], "El esquema representa el problema con un modelo de datos; el diagrama es solo su dibujo."],
+      ["Un Sistema de Bases de Datos (SBD) está formado por…", ["Aplicaciones, SGBD, datos y metadatos", "Solo el SGBD", "El SGBD y los archivos del SO", "Los datos y los usuarios"], "Lámina 25: el SBD es el conjunto de aplicaciones, el SGBD y todos los datos y metadatos."],
+      ["«En el modelo relacional no existen atributos multivaluados». ¿Qué tipo de restricción es?", ["Inherente", "Implícita", "Explícita", "De aplicación"], "La impone el propio modelo de datos, no el esquema del diseñador."],
+      ["Una cardinalidad (1,N) dibujada en el diagrama es una restricción…", ["Implícita", "Inherente", "Explícita", "Física"], "Se expresa con las estructuras del esquema (el diagrama)."],
+      ["¿Qué mapeo de ANSI-SPARC proporciona la independencia física?", ["Conceptual ↔ interno", "Externo ↔ conceptual", "Externo ↔ interno", "Ninguno: la da el SO"], "Cambiar el almacenamiento no afecta al esquema conceptual."],
+      ["Agregar un índice sin modificar las vistas ni las aplicaciones es un ejemplo de…", ["Independencia física", "Independencia lógica", "Control de redundancia", "Soporte de visiones"], "Es un cambio en el nivel interno que no afecta a los niveles superiores."],
+      ["¿En cuál caso NO es recomendable usar un SGBD?", ["Un sistema embebido con almacenamiento limitado y tiempo real estricto", "Un banco con miles de usuarios concurrentes", "Una universidad que comparte datos entre facultades", "Un portal turístico con reservas en línea"], "La lámina 31 lista embebidos, tiempo real estricto, aplicaciones simples y sin multiusuario."],
+      ["GRANT y REVOKE pertenecen al…", ["DCL", "DDL", "DML", "SDL"], "Son instrucciones de control de acceso."],
+      ["El modelo ER es un modelo de…", ["Alto nivel, conceptual o semántico", "Implementación o lógico", "Bajo nivel o físico", "Identificación por existencia"], "Describe la realidad sin depender de un SGBD."],
+      ["¿Qué componente del modelo de datos NO es parte de la terna clásica?", ["Interfaces", "Estructuras", "Restricciones", "Operaciones"], "Modelo de datos = estructuras + restricciones + operaciones."],
+      ["Un modelo donde cada objeto tiene un OID propio es…", ["Con identificación por existencia", "Con identificación por valores", "Semi-estructurado", "Físico"], "El relacional identifica por valores; los orientados a objetos, por existencia."],
+      ["Una BD cuyos datos están repartidos en servidores de Caracas, Mérida y Puerto Ordaz conectados por red es…", ["Distribuida", "Centralizada", "Monousuario", "Semi-estructurada"], "Los datos viven en varios sitios."],
+      ["Un sistema que registra miles de ventas cortas por minuto es de tipo…", ["OLTP (transaccional)", "OLAP (analítico)", "Embebido", "No estructurado"], "OLAP es para análisis y reportes sobre históricos."],
+      ["En la lista de ventajas de la lámina aparece «Redundancia». ¿Qué significa realmente?", ["Control de la redundancia", "Que la BD duplica los datos a propósito", "Que no existe redundancia posible", "Respaldo automático"], "El SGBD permite controlar (minimizar) la redundancia."]
+    ]
+  },
+
+  /* ============================================================ 2 */
+  {
+    id: "er", name: "Modelo ER: entidades y atributos", src: "Unidad II · Elmasri cap. 3 · Notación (1)", hue: 155,
+    blurb: "Entidad fuerte y débil, tipos de atributo, claves, interrelaciones, grado, roles y recursividad en notación Chen.",
+    concepts: [
+      { t: "Entidad y conjunto de entidades", p: "Una <b>entidad</b> es una cosa del mini-mundo con existencia independiente (un hito, una parada). El <b>conjunto de entidades</b> (tipo) agrupa las que tienen los mismos atributos y se dibuja con un <b>rectángulo</b> con el nombre en singular y mayúsculas.", tip: "Una clave foránea NUNCA aparece como atributo en el ER: esa conexión se dibuja como interrelación." },
+      { t: "Tipos de atributo", p: "Cada uno tiene su dibujo:", list: ["<b>Simple</b>: óvalo. <b>Compuesto</b>: óvalo con óvalos hijos (ubicacion = latitud, longitud, elevacion).", "<b>Multivaluado</b>: óvalo doble (idiomas de un guía).", "<b>Derivado</b>: óvalo punteado; se calcula de otros datos (edad desde fecha_nac; total de horas = teóricas + prácticas).", "<b>Clave</b>: nombre subrayado. <b>Clave parcial</b> de entidad débil: subrayado punteado.", "<b>Opcional</b> (puede ser nulo): no tiene símbolo propio, se aclara por escrito."] },
+      { t: "Claves", p: "Una <b>clave</b> es un atributo (o combinación) cuyos valores son distintos para cada entidad del conjunto. Puede haber varias <b>claves candidatas</b>; todas se subrayan. Una clave compuesta se dibuja como atributo compuesto con el óvalo padre subrayado.", list: ["COMERCIO: rif y razon_social, ambas únicas.", "GUIA: (rtn, licencia) juntas.", "Centro de formación (GERES): (nombre, municipio)."] },
+      { t: "Entidad débil", p: "No tiene clave propia: se identifica gracias a una <b>entidad propietaria</b>. Se dibuja con <b>rectángulo doble</b>, la interrelación que la une al propietario es <b>identificante</b> (rombo doble) y su <b>clave parcial</b> va con subrayado punteado. Identificación completa = clave del propietario + clave parcial.", list: ["MUNICIPIO es débil de ESTADO porque hay municipios Bolívar en 7 estados.", "Un curso de GERES es débil del centro: «Electricidad Industrial» existe en varios centros.", "Habitación 1A del hotel Alba ≠ habitación 1A del hotel Meliá: HABITACION es débil de HOTEL."], tip: "La entidad débil siempre participa de forma total, (1,1), en su interrelación identificante." },
+      { t: "Interrelaciones", p: "Una <b>interrelación</b> asocia entidades y se dibuja con un <b>rombo</b> con un verbo. Puede tener atributos propios cuando el dato solo tiene sentido para la combinación (el <b>orden</b> de un hito dentro de una ruta).", list: ["<b>Grado</b>: unaria/recursiva (1 conjunto), binaria (2), ternaria (3), n-aria.", "Una ternaria NO equivale a tres binarias: se pierde qué tripleta ocurrió realmente.", "Cada rombo lleva un nombre distinto en todo el diagrama."] },
+      { t: "Roles y relaciones recursivas", p: "Cuando el mismo conjunto participa dos veces en una interrelación, cada participación lleva un <b>rol</b>. Ejemplo de la profesora: <b>es_requisito</b>(Asignatura como <i>req</i>, Asignatura como <i>asig</i>). En LPO se escribe <code>e[Asignatura, req]</code>." },
+      { t: "Cómo extraer el ER de un enunciado", p: "Lee buscando señales:", list: ["Sustantivo con identidad y datos propios → <b>entidad</b>.", "«Se identifica por X dentro de Y» → <b>débil</b> + clave parcial.", "«Puede tener varios…» sin datos propios → <b>multivaluado</b>; con datos propios → otra entidad.", "«Se calcula como…» → <b>derivado</b>.", "Verbo que une cosas → <b>interrelación</b>. Dato de la combinación → atributo del rombo.", "Regla que el dibujo no muestra → <b>restricción explícita</b>."] }
+    ],
+    cards: [
+      ["¿Cómo se dibuja una entidad débil?", "Rectángulo doble, unida a su propietaria por un rombo doble (identificante); su clave parcial va subrayada con línea punteada."],
+      ["¿Cómo se dibuja un atributo multivaluado?", "Con un óvalo doble."],
+      ["¿Cómo se dibuja un atributo derivado?", "Con un óvalo de borde punteado."],
+      ["¿Qué es una clave parcial?", "El atributo que identifica a una entidad débil solo dentro de su propietaria."],
+      ["¿Cómo se identifica completamente una entidad débil?", "Clave de la entidad propietaria + clave parcial de la débil."],
+      ["¿Puede haber dos claves subrayadas en una entidad?", "Sí: si hay varias claves candidatas, todas se subrayan."],
+      ["¿Dónde va un atributo que depende de la combinación de dos entidades?", "En la interrelación (cuelga del rombo)."],
+      ["¿Qué es el grado de una interrelación?", "La cantidad de conjuntos de entidades que participan."],
+      ["¿Una ternaria equivale a tres binarias?", "No: tres binarias no garantizan qué tripletas existieron realmente."],
+      ["¿Para qué sirven los roles?", "Para distinguir participaciones del mismo conjunto en una interrelación (recursiva)."],
+      ["¿Aparecen claves foráneas en el ER?", "No. La conexión se dibuja con un rombo; las FK aparecen recién en el modelo relacional."]
+    ],
+    quiz: [
+      ["«Existen municipios Bolívar en Anzoátegui, Aragua, Barinas…». ¿Cómo debe modelarse MUNICIPIO?", ["Entidad débil de ESTADO con clave parcial nombre", "Entidad fuerte con clave nombre", "Atributo multivaluado de ESTADO", "Atributo compuesto de CENTRO"], "El nombre no basta para identificar: hace falta saber el estado."],
+      ["¿Qué figura muestra un atributo derivado?", ["Óvalo con borde punteado", "Óvalo doble", "Óvalo con nombre subrayado punteado", "Rombo doble"], "Óvalo doble = multivaluado; subrayado punteado = clave parcial."],
+      ["Los idiomas que domina un guía, sin más datos de cada idioma, se modelan como…", ["Atributo multivaluado", "Entidad débil", "Atributo derivado", "Interrelación recursiva"], "Varios valores del mismo dato, sin atributos propios."],
+      ["Si cada idioma tuviera nivel de certificación y organismo emisor, convendría…", ["Modelar IDIOMA como entidad e interrelacionarla con GUIA (con el nivel en el rombo)", "Mantenerlo como multivaluado", "Hacerlo atributo derivado", "Ponerlo como clave de GUIA"], "Cuando el valor tiene datos propios deja de ser un atributo y pasa a ser entidad."],
+      ["El «orden» de un hito dentro de una ruta debe ir…", ["Como atributo de la interrelación entre RUTA y el punto", "Como atributo de HITO", "Como atributo de RUTA", "Como clave de HITO"], "Un hito puede ser el 2.º punto de una ruta y el 5.º de otra."],
+      ["¿Qué participación tiene siempre una entidad débil en su interrelación identificante?", ["Total, (1,1)", "Parcial, (0,1)", "(0,N)", "(1,N)"], "Toda débil depende de exactamente un propietario."],
+      ["La habitación 1A existe en el hotel Alba y en el Meliá. Esto indica que HABITACION…", ["Es débil de HOTEL con clave parcial numero", "Es fuerte con clave numero", "Es multivaluado de HOTEL", "Es una especialización de HOTEL"], "El número solo identifica dentro de cada hotel."],
+      ["¿Cuál es el error en dibujar el atributo «id_municipio» dentro de HITO?", ["Es una clave foránea; en el ER esa conexión se dibuja con una interrelación", "Debería ser multivaluado", "Debería ir subrayado", "No hay error"], "Las FK son del modelo relacional."],
+      ["Una asignatura es requisito de otra asignatura. Esta interrelación es…", ["Recursiva (unaria) con roles", "Ternaria", "Identificante", "Una categoría"], "El mismo conjunto participa dos veces, con roles req y asig."],
+      ["En el registro de un nacimiento intervienen MADRE, BEBE y dos MEDICOS. ¿Qué grado tiene la interrelación?", ["Ternaria", "Binaria", "Unaria", "Cuaternaria"], "Participan tres conjuntos distintos (aunque un bebé aparezca en dos tripletas)."],
+      ["La superficie total de un inmueble es «la suma del área de todas sus unidades». Es un atributo…", ["Derivado", "Multivaluado", "Clave", "Compuesto"], "Se calcula a partir de otros datos."],
+      ["Una dirección formada por calle, urbanización, ciudad y código postal es un atributo…", ["Compuesto", "Multivaluado", "Derivado", "Clave parcial"], "Se divide en partes con significado propio."]
+    ]
+  },
+
+  /* ============================================================ 3 */
+  {
+    id: "card", name: "Cardinalidad (min,max)", src: "Notación Navathe · Restricciones · Figura 2", hue: 25,
+    blurb: "Cómo leer y escribir los pares (min,max), participación total/parcial, opcionalidad y el ejemplo ternario del nacimiento.",
+    concepts: [
+      { t: "La regla de oro", p: "El par <b>(min,max)</b> pegado a una entidad dice <b>en cuántas instancias de la interrelación participa CADA entidad de ese conjunto</b>, como mínimo y como máximo.", tip: "Es al revés de la notación 1:N, donde el número se lee del otro lado. Es el error más común en la parte de selección del parcial." },
+      { t: "Pares frecuentes", p: "Cómo se lee cada uno:", list: ["<b>(0,1)</b>: opcional, a lo sumo una vez.", "<b>(1,1)</b>: obligatoria, exactamente una vez.", "<b>(0,N)</b>: opcional, cero o muchas.", "<b>(1,N)</b>: obligatoria, al menos una.", "<b>(2,N)</b>, <b>(2,2)</b>, <b>(0,300)</b>: también válidos; la notación admite números."] },
+      { t: "Participación total y parcial", p: "<b>min ≥ 1</b> significa participación <b>total</b> (todas las entidades participan); <b>min = 0</b>, <b>parcial</b>. En la notación de líneas, la total se marca con <b>doble línea</b>. Con (min,max) el mínimo ya lo dice." },
+      { t: "Equivalencia con 1:1, 1:N, M:N", p: "Mira los <b>máximos</b>: si A tiene máx 1 y B máx N, cada A se asocia con una sola B y cada B con muchas A, es decir, <b>1:N de B hacia A</b>. Ambos máx 1 → 1:1. Ambos máx N → M:N.", list: ["PARADA (1,1) — ubicada_en — (0,N) VIA: cada parada en una sola vía; cada vía con muchas paradas.", "Al traducir al relacional, la FK va en la entidad con <b>máx = 1</b>; si su mín = 1, la FK es NOT NULL."] },
+      { t: "Ternarias: el nacimiento", p: "Figura 2 del material: MEDICO (0,300) · MADRE (2,N) · BEBE (2,2) en la ternaria Nacimiento.", list: ["BEBE (2,2): cada bebé aparece en exactamente 2 tripletas (lo atienden dos médicos).", "MADRE (2,N): cada madre aparece al menos en 2 tripletas (tiene al menos un bebé, que genera dos tripletas).", "MEDICO (0,300): un médico puede no haber atendido partos y aparece a lo más en 300 tripletas."], tip: "En una ternaria el par cuenta TRIPLETAS, no entidades del otro lado." },
+      { t: "Cómo decidir el par desde el enunciado", p: "Haz dos preguntas por cada lado: ¿puede una entidad X no participar nunca? (decide el mínimo) y ¿puede participar más de una vez? (decide el máximo).", list: ["«Cada objeto de arte se vincula a lo sumo con un artista; si el autor es desconocido queda sin asociación» → OBJETO (0,1).", "«Un artista puede haber creado múltiples objetos» → ARTISTA (0,N) si puede haber artistas sin obras registradas, (1,N) si no.", "«Ningún curso puede existir sin estar adscrito a un centro» → CURSO (1,1)."] }
+    ],
+    cards: [
+      ["¿Qué indica el par junto a una entidad?", "En cuántas instancias de la interrelación participa cada entidad de ese conjunto (mínimo y máximo)."],
+      ["min = 0 significa…", "Participación parcial u opcional."],
+      ["min ≥ 1 significa…", "Participación total u obligatoria."],
+      ["A (1,1) — r — (0,N) B en notación 1:N", "1:N de B hacia A: cada A con una B; cada B con muchas A."],
+      ["¿Qué cuenta el par en una ternaria?", "El número de tripletas de la interrelación en las que aparece la entidad."],
+      ["BEBE (2,2) en Nacimiento", "Cada bebé aparece en exactamente dos tripletas: lo atienden dos médicos."],
+      ["¿Qué lado recibe la FK al traducir una 1:N?", "La entidad cuyo máximo es 1."],
+      ["Par de una entidad débil en su relación identificante", "(1,1)."]
+    ],
+    quiz: [
+      ["¿Qué afirma el diagrama?", ["Cada parada está en exactamente una vía y una vía puede tener cero o muchas paradas", "Cada vía está en exactamente una parada", "Cada parada puede estar en muchas vías", "Toda vía tiene al menos una parada"], "El (1,1) va junto a PARADA: cada parada participa una sola vez.", { t: "bin", a: "PARADA", ca: "(1,1)", r: "ubicada_en", cb: "(0,N)", b: "VIA" }],
+      ["¿Qué afirma el diagrama?", ["Todo hito pertenece al menos a una categoría y puede haber categorías sin hitos", "Toda categoría tiene al menos un hito", "Cada hito tiene a lo sumo una categoría", "Ninguna categoría puede quedar vacía y cada hito tiene una sola"], "HITO (1,N): al menos una categoría. CATEGORIA (0,N): puede no clasificar ninguno.", { t: "bin", a: "HITO", aw: 1, ca: "(1,N)", r: "clasifica", cb: "(0,N)", b: "CATEGORIA" }],
+      ["¿Qué afirma el diagrama?", ["Una incidencia puede no estar confirmada todavía y a lo sumo la confirma una institución", "Toda incidencia está confirmada", "Una institución confirma a lo sumo una incidencia", "Cada incidencia la confirman varias instituciones"], "min = 0 en INCIDENCIA: opcional.", { t: "bin", a: "INCIDENCIA", ca: "(0,1)", r: "confirma", cb: "(0,N)", b: "INSTITUCION" }],
+      ["¿Qué tipo de interrelación es, en notación clásica?", ["1:N (un estado tiene muchos municipios)", "1:1", "M:N", "N:1 (un municipio tiene muchos estados)"], "MUNICIPIO tiene máx 1 y ESTADO máx N.", { t: "bin", a: "ESTADO", ca: "(1,N)", r: "tiene", rid: 1, cb: "(1,1)", b: "MUNICIPIO", bw: 1 }],
+      ["Un objeto de arte se vincula a lo sumo con un artista; si el autor es desconocido queda sin asociación. ¿Qué par lleva OBJETO en «crea»?", ["(0,1)", "(1,1)", "(0,N)", "(1,N)"], "Puede no tener artista (min 0) y como mucho uno (max 1)."],
+      ["Según la figura, ¿cuántas tripletas de Nacimiento tiene cada bebé?", ["Exactamente dos", "Al menos dos", "Exactamente una", "Entre 0 y 300"], "BEBE (2,2).", { t: "tern", a: "MADRE", ca: "(2,N)", b: "BEBE", cb: "(2,2)", c: "MEDICO", cc: "(0,300)", r: "Nacimiento" }],
+      ["Según la figura, ¿cuál afirmación es FALSA?", ["Existen madres sin hijos", "Todo bebé aparece en dos tripletas", "Un médico aparece a lo más en 300 tripletas", "Toda madre aparece al menos en dos tripletas"], "MADRE (2,N): toda madre participa, así que no hay madres sin hijos.", { t: "tern", a: "MADRE", ca: "(2,N)", b: "BEBE", cb: "(2,2)", c: "MEDICO", cc: "(0,300)", r: "Nacimiento" }],
+      ["«Toda ruta tiene al menos un origen y un destino». ¿Qué par lleva RUTA en «compone»?", ["(2,N)", "(1,N)", "(0,N)", "(2,2)"], "Al menos dos puntos; sin máximo fijo."],
+      ["Un estudiante dibujó RUTA (0,N) — origina — (1,1) MUNICIPIO para decir «cada ruta sale de un municipio». ¿Qué está mal?", ["Los pares están invertidos: RUTA debería tener (1,1) y MUNICIPIO (0,N)", "Nada, está bien", "Debería ser (1,1) en ambos lados", "Debería ser M:N"], "El par va junto a la entidad cuya participación describe."],
+      ["En el diagrama, ¿qué entidad recibirá la clave foránea al traducir?", ["CREDENCIAL", "VISITANTE", "Las dos", "Ninguna: se crea una tabla nueva"], "Es 1:N; la FK va en el lado con máx 1.", { t: "bin", a: "CREDENCIAL", ca: "(1,1)", r: "adquiere", cb: "(0,N)", b: "VISITANTE" }],
+      ["¿Qué significa doble línea entre una entidad y un rombo?", ["Participación total", "Interrelación identificante", "Atributo multivaluado", "Especialización solapada"], "Equivale a min ≥ 1."],
+      ["GUIA (0,N) — acompaña — (0,N) RUTA es, en notación clásica…", ["M:N", "1:N", "1:1", "N:1"], "Los dos máximos son N."]
+    ]
+  },
+
+  /* ============================================================ 4 */
+  {
+    id: "ere", name: "Modelo ERE", src: "Unidad II · Elmasri cap. 4", hue: 290,
+    blurb: "Superclase/subclase, herencia, especialización y generalización, restricciones d/o y total/parcial, jerarquías, retículos y categorías (unión).",
+    concepts: [
+      { t: "Superclase y subclase", p: "Una <b>subclase</b> agrupa entidades de una superclase que tienen atributos o relaciones propias. Toda entidad de la subclase <b>es también</b> entidad de la superclase (relación <b>IS A</b>) y <b>hereda</b> todos sus atributos y relaciones.", list: ["Ejemplo: PINTURA y ESCULTURA son subclases de OBJETO_ARTE; heredan titulo, pais, epoca."] },
+      { t: "Especialización y generalización", p: "Son el mismo resultado visto desde dos lados.", list: ["<b>Especialización</b> (de arriba hacia abajo): partes de la superclase y defines subclases.", "<b>Generalización</b> (de abajo hacia arriba): partes de entidades parecidas y extraes una superclase con lo común."] },
+      { t: "Restricción de disyunción: d / o", p: "Se escribe dentro del círculo.", list: ["<b>d</b> (disjunta): una entidad pertenece a lo sumo a una subclase. «Una obra no puede ser propiedad del museo y prestada a la vez».", "<b>o</b> (solapada, overlap): puede estar en varias."] },
+      { t: "Restricción de completitud: total / parcial", p: "<b>Total</b> (doble línea de la superclase al círculo): toda entidad de la superclase pertenece a alguna subclase. <b>Parcial</b> (línea simple): puede no pertenecer a ninguna.", list: ["Museo: «No es posible un objeto que no sea ni pintura ni escultura» → <b>total y disjunta</b>.", "Las dos restricciones son independientes: hay 4 combinaciones (d-total, d-parcial, o-total, o-parcial)."] },
+      { t: "Atributo definitorio", p: "Si la pertenencia a la subclase se decide por el valor de un atributo de la superclase (tipo = 'pintura'), la especialización es <b>definida por atributo</b> (o por predicado) y se escribe la condición en la línea. Si no, es <b>definida por el usuario</b>." },
+      { t: "Jerarquías y retículos", p: "En una <b>jerarquía</b> cada subclase tiene una sola superclase (herencia simple). En un <b>retículo</b> (lattice) una subclase puede tener varias superclases: es una <b>subclase compartida</b> y hereda de todas (herencia múltiple).", tip: "Subclase compartida = intersección (está en TODAS sus superclases). Categoría = unión (está en UNA de ellas)." },
+      { t: "Categoría (unión)", p: "Una <b>categoría</b> es una subclase de la <b>unión</b> de superclases <b>distintas</b> (normalmente con claves diferentes). Se dibuja con un círculo con <b>∪</b>; el símbolo ⊂ va en la línea hacia la categoría.", list: ["PUNTO_ITINERARIO = ∪(HITO, PARADA): cada punto es un hito o una parada.", "AFECTABLE = ∪(HITO, VIA) con el rombo afecta: una incidencia afecta a un hito o a una vía.", "Hereda <b>selectivamente</b>: cada miembro solo los atributos de la superclase a la que pertenece.", "Total (doble línea): toda entidad de las superclases está en la categoría. Parcial: no necesariamente."] },
+      { t: "Símbolos del ERE", p: "Resumen del dibujo:", list: ["Círculo con <b>d</b> u <b>o</b> debajo de la superclase; líneas a cada subclase con el <b>⊂</b> (arco) cuya boca mira al círculo.", "Doble línea superclase → círculo = total.", "Círculo con <b>∪</b>: varias superclases entran; sale la categoría."] }
+    ],
+    cards: [
+      ["¿Qué hereda una subclase?", "Todos los atributos y relaciones de su superclase."],
+      ["Especialización vs. generalización", "Especialización: de la superclase a subclases (top-down). Generalización: de entidades parecidas a una superclase (bottom-up)."],
+      ["¿Qué significa la «d» en el círculo?", "Disjunta: una entidad está a lo sumo en una subclase."],
+      ["¿Qué significa la «o»?", "Solapada: una entidad puede estar en varias subclases."],
+      ["¿Cómo se marca una especialización total?", "Con doble línea de la superclase al círculo."],
+      ["¿Qué es un atributo definitorio?", "El atributo de la superclase cuyo valor decide a qué subclase pertenece la entidad."],
+      ["Subclase compartida vs. categoría", "Compartida: intersección (está en todas sus superclases). Categoría: unión (está en una)."],
+      ["¿Cuándo usar una categoría?", "Cuando algo puede ser una entidad u otra de conjuntos distintos con claves diferentes."],
+      ["¿Qué hereda una categoría?", "Selectivamente: cada entidad hereda solo de la superclase a la que pertenece."]
+    ],
+    quiz: [
+      ["«Todo objeto es pintura o escultura, nunca ambas, y no existe objeto que no sea ninguna». La especialización es…", ["Disjunta y total", "Solapada y total", "Disjunta y parcial", "Solapada y parcial"], "«Nunca ambas» = d. «No existe ninguna sin tipo» = total.", { t: "spec", sup: "OBJETO_ARTE", subs: ["PINTURA", "ESCULTURA"], sym: "?", total: true }],
+      ["¿Qué expresa el diagrama?", ["Una persona puede ser guía y visitante a la vez, o ninguna de las dos", "Toda persona es guía o visitante, pero no ambas", "Toda persona es exactamente una de las dos", "Toda persona es guía y visitante"], "o = solapada; línea simple = parcial.", { t: "spec", sup: "PERSONA", subs: ["GUIA", "VISITANTE"], sym: "o", total: false }],
+      ["¿Qué expresa el diagrama?", ["Toda ruta es fija o dinámica, nunca ambas", "Puede haber rutas sin tipo", "Una ruta puede ser fija y dinámica", "FIJA y DINAMICA no heredan el nombre de RUTA"], "d + doble línea = disjunta y total.", { t: "spec", sup: "RUTA", supw: 1, subs: ["FIJA", "DINAMICA"], sym: "d", total: true }],
+      ["Una incidencia afecta a un hito o a un tramo de vía (claves distintas). ¿Qué estructura lo modela sin restricción extra?", ["Una categoría ∪(HITO, VIA)", "Una especialización disjunta de INCIDENCIA", "Una subclase compartida de HITO y VIA", "Un atributo multivaluado"], "Unión de superclases distintas."],
+      ["¿En qué se diferencia una subclase compartida de una categoría?", ["La compartida pertenece a TODAS sus superclases; la categoría a UNA", "Son lo mismo", "La categoría hereda de todas sus superclases", "La compartida solo existe con «o»"], "Intersección vs. unión."],
+      ["¿Qué hereda un miembro de la categoría PUNTO_ITINERARIO que es una parada?", ["Solo los atributos de PARADA", "Los de HITO y PARADA", "Ninguno", "Solo los de HITO"], "Herencia selectiva."],
+      ["La tenencia en el museo: colección permanente o prestado, nunca ambas, y todo objeto tiene una. ¿Cuántas especializaciones tiene OBJETO_ARTE?", ["Dos, ambas disjuntas y totales", "Una sola con cuatro subclases", "Dos, una solapada", "Ninguna: son atributos"], "Hay dos criterios independientes: tipo técnico y forma de propiedad."],
+      ["Si la subclase se determina por el valor de «tipo» de la superclase, la especialización es…", ["Definida por atributo (predicado)", "Definida por el usuario", "Una categoría", "Parcial obligatoriamente"], "El atributo tipo es el definitorio."],
+      ["Partir de AUTO y CAMION y crear VEHICULO con lo común es…", ["Generalización", "Especialización", "Categorización", "Agregación"], "Bottom-up."],
+      ["¿Qué significa la doble línea entre la superclase y el círculo?", ["Especialización total", "Especialización disjunta", "Interrelación identificante", "Categoría"], "Completitud total."],
+      ["En una jerarquía de especialización, cada subclase tiene…", ["Una sola superclase", "Varias superclases", "Ninguna superclase", "Exactamente dos superclases"], "Varias superclases → retículo."],
+      ["El ⊂ en la línea de una subclase indica…", ["La dirección de la relación subclase ⊂ superclase", "Que es una entidad débil", "Que es parcial", "Que es solapada"], "La subclase es subconjunto de la superclase."]
+    ]
+  },
+
+  /* ============================================================ 5 */
+  {
+    id: "calidad", name: "Calidad y tipos de restricción", src: "Criterios.pdf · Introducción", hue: 85,
+    blurb: "Compleción, corrección, minimalidad, expresividad, legibilidad, autoexplicación, extensibilidad, y cuándo una restricción va en el diagrama o en LPO.",
+    concepts: [
+      { t: "Cualidades de un esquema", p: "Láminas de criterios de la profesora:", list: ["<b>Compleción</b>: universo de discurso ↔ esquema; todo requisito está representado.", "<b>Corrección</b> <b>sintáctica</b> (se usan bien los símbolos) y <b>semántica</b> (los conceptos se usan según su definición; p. ej. usar binaria donde va ternaria es error semántico).", "<b>Minimalidad</b>: cada aspecto aparece una sola vez.", "<b>Expresividad</b>: representa los requisitos de forma natural y fácil de entender.", "<b>Legibilidad</b>: respeta criterios estéticos; diagrama elegante.", "<b>Autoexplicación</b>: representa muchas propiedades sin otros formalismos.", "<b>Extensibilidad</b>: se adapta a requisitos cambiantes porque se descompone en módulos o vistas.", "<b>Normalidad</b>: se verá con normalización."] },
+      { t: "¿Va en el diagrama o en LPO?", p: "La pregunta clave: <b>¿el diagrama ya lo dice?</b> Si sí, es implícita y escribirla en LPO viola la <b>minimalidad</b>. Si no, es explícita.", list: ["Implícitas: claves, (min,max), participación total, entidad débil, d/o, total/parcial, categorías.", "Explícitas típicas: comparación entre atributos, rangos, reglas temporales, reglas que dependen de otra interrelación, exclusiones no dibujadas, conteos."] },
+      { t: "Restricción vs. funcionalidad", p: "Una restricción describe un <b>estado de los datos que nunca debe ocurrir</b>. Una funcionalidad describe algo que el sistema <b>hace</b> (cerrar facturas cada mes, archivar, enviar alertas). Las funcionalidades van en los requisitos, no en la lista de restricciones.", tip: "Error visto en proyectos anteriores: «cierre mensual masivo» o «soft-delete a los 365 días» listados como restricciones." },
+      { t: "Restricciones explícitas típicas en los ejercicios", p: "Ejemplos de la Práctica ER:", list: ["GERES: presupuesto del centro dentro de [cuota mínima, cuota máxima] de su estado y nivel.", "GERES: nota mínima 75 en la teórica y 85 en la práctica; inasistencias ≤ 10% de horas prácticas.", "Hoteles: tarifas dentro del rango de su ciudad y categoría; fecha de salida posterior a la de ingreso.", "Música: la participación del artista ocurre dentro de su periodo en el grupo.", "Museo: fecha de devolución posterior a la de recepción; fallecimiento posterior a nacimiento."] }
+    ],
+    cards: [
+      ["Compleción", "Todo requisito del universo de discurso aparece en el esquema."],
+      ["Corrección semántica (ejemplo de la profesora)", "Usar los conceptos según su definición; usar binaria en vez de ternaria es un error semántico."],
+      ["Minimalidad", "Cada aspecto de los requisitos aparece una sola vez en el esquema."],
+      ["Expresividad", "Representa los requisitos de forma natural y fácil de entender."],
+      ["Legibilidad", "Respeta criterios estéticos que hacen el diagrama elegante."],
+      ["Autoexplicación", "Representa un gran número de propiedades sin otros formalismos."],
+      ["Extensibilidad", "Se adapta a requisitos cambiantes porque se descompone en módulos o vistas."],
+      ["¿Escribir en LPO algo que el diagrama ya garantiza viola…?", "La minimalidad."]
+    ],
+    quiz: [
+      ["Escribir en LPO «un hito no repite nombre en su parroquia» cuando HITO ya es débil de PARROQUIA con clave parcial nombre viola…", ["La minimalidad", "La compleción", "La legibilidad", "La extensibilidad"], "Ese aspecto ya está representado en el diagrama."],
+      ["Modelar Nacimiento con tres binarias en vez de una ternaria es un error de…", ["Corrección semántica", "Corrección sintáctica", "Legibilidad", "Minimalidad"], "Es el ejemplo de la lámina."],
+      ["Dibujar una entidad débil sin rombo doble es un error de…", ["Corrección sintáctica", "Corrección semántica", "Compleción", "Extensibilidad"], "Se usó mal un símbolo del modelo."],
+      ["Un diagrama con decenas de líneas cruzadas que cuesta seguir falla en…", ["Legibilidad", "Compleción", "Minimalidad", "Corrección semántica"], "Es un criterio estético."],
+      ["Separar el esquema en módulos para que un cambio afecte solo a una parte favorece la…", ["Extensibilidad", "Autoexplicación", "Minimalidad", "Corrección"], "Definición de la lámina 3."],
+      ["¿Cuál de estas es una restricción explícita y NO una funcionalidad?", ["La fecha de vencimiento de una experiencia es posterior a su activación", "El sistema cierra las facturas cada fin de mes", "El sistema envía una alerta al guía", "Los registros se archivan tras un año"], "Las otras describen procesos que el sistema ejecuta."],
+      ["¿Cuál restricción SÍ debe escribirse en LPO?", ["El presupuesto del centro está entre la cuota mínima y la máxima de su estado y nivel", "Cada curso pertenece a un único centro", "Un trabajador se identifica por su cédula", "Toda pintura es un objeto de arte"], "Las demás ya se ven en el diagrama (cardinalidad, clave, IS A)."],
+      ["Si falta en el esquema un requisito del enunciado, se viola la…", ["Compleción", "Minimalidad", "Legibilidad", "Normalidad"], "Universo de discurso ↔ esquema."]
+    ]
+  }
+];
+
+window.MODULES = window.MODULES.concat([
+  /* ============================================================ 6 */
+  {
+    id: "lpo", name: "Restricciones en LPO", src: "Un Lenguaje Lógico para Restricciones Explícitas", hue: 55,
+    blurb: "La notación de la profesora: (∀x | rango : cuerpo), ∃, cuantificadores numéricos, punto, corchetes, tuplas, agregación y los patrones que más se repiten.",
+    concepts: [
+      { t: "La forma general", p: "<code>(∀x | rango : cuerpo)</code> se lee «para todo x que cumpla el rango, se cumple el cuerpo». <code>(∃x | rango : cuerpo)</code>: «existe algún x en el rango que cumple el cuerpo».", list: ["El <b>rango</b> (antes de «:») dice de dónde sale la variable: <code>e ∈ EXPERIENCIA</code> o <code>EXPERIENCIA(e)</code> (equivalentes).", "El <b>cuerpo</b> (después de «:») es lo que se exige.", "Una variable solo existe dentro del paréntesis de su cuantificador."] },
+      { t: "Negación: ∀ y ∃ se intercambian", p: "<code>¬(∃a | R : P)</code> ≡ <code>(∀a | R : ¬P)</code>. Las prohibiciones («no existe…», «ningún…») suelen escribirse con <b>¬∃</b>.", list: ["Ejemplo 1 de la guía: ¬(∃a | a ∈ Asignatura : a.TrimAp > 15 ∨ a.TrimAp < 1) ≡ (∀a | a ∈ Asignatura : a.TrimAp ≥ 1 ∧ a.TrimAp ≤ 15).", "De Morgan dentro del cuerpo: ¬(A ∨ B) ≡ ¬A ∧ ¬B."] },
+      { t: "Notaciones del lenguaje", p: "Piezas permitidas por el material:", list: ["<b>Punto</b>: <code>h.ubicacion.latitud</code> (atributo, y sub-atributo de un compuesto).", "<b>Corchetes</b>: <code>c[ESTADO]</code> es la entidad de ESTADO enlazada por la instancia c; con rol: <code>e[Asignatura, req]</code>.", "<b>Tuplas</b>: <code>(a, a) ∈ es_requisito</code>; no se asume orden entre los elementos.", "<b>Constantes</b>: números, cadenas, conjuntos ({'activa','resuelta'}), nombres de conjuntos, roles, atributos e <b>IS A</b>.", "<b>Agregación</b>: Σ, Π, AVG, MIN, MAX."], tip: "Nunca uses como variable el nombre de un conjunto, atributo o rol. Tampoco inventes predicados (cumple_perfil, es_fin_de_mes)." },
+      { t: "Cuantificadores numéricos", p: "Extensión del ∃ para contar objetos distintos:", list: ["<b>∃ₙ</b> (n abajo): <b>al menos</b> n.", "<b>∃ⁿ</b> (n arriba): <b>a lo más</b> n.", "<b>∃!ₙ</b>: <b>exactamente</b> n.", "<b>∃ₙᵐ</b>: <b>entre</b> n y m."], tip: "En el material, «un profesor no dicta más de dos asignaturas» se escribe con ∃² (a lo más 2)." },
+      { t: "Patrón 1: comparar atributos de una entidad", p: "<code>(∀e | e ∈ EXPERIENCIA : e.fechaVencimiento > e.fechaActivacion)</code>. Si el atributo es opcional: <code>(∀a | a ∈ ARTISTA ∧ a.fechaFallecimiento ≠ nulo : a.fechaFallecimiento > a.fechaNacimiento)</code>." },
+      { t: "Patrón 2: rango de valores", p: "<code>(∀v | v ∈ EVALUACION : 1 ≤ v.calificacion ∧ v.calificacion ≤ 5)</code>. Dominio enumerado: <code>(∀i | i ∈ INCIDENCIA : i.estado ∈ {'preliminar','activa','resuelta'})</code>." },
+      { t: "Patrón 3: depende de otra interrelación", p: "«Un visitante solo evalúa una ruta que completó»:", list: ["<code>(∀e | e ∈ evalua : (∃r | r ∈ realiza : r[VISITANTE] = e[VISITANTE] ∧ r[RUTA] = e[RUTA] ∧ r.completado = verdadero))</code>"] },
+      { t: "Patrón 4: dos elementos del mismo conjunto", p: "Para comparar dos instancias distintas usa dos variables y exige <b>x ≠ x'</b>. Choque de horarios (dos intervalos se solapan si cada uno empieza antes de que termine el otro):", list: ["<code>¬(∃r, r' | r ∈ reserva ∧ r' ∈ reserva ∧ r ≠ r' ∧ r[ESPACIO] = r'[ESPACIO] ∧ r.fecha = r'.fecha : r.inicio < r'.fin ∧ r'.inicio < r.fin)</code>"], tip: "Si olvidas r ≠ r', la fórmula compara cada reserva consigo misma y siempre encuentra un «choque»." },
+      { t: "Patrón 5: contar", p: "«Un profesor dicta a lo más 2 asignaturas por período»:", list: ["<code>(∀p, f | Período(p) ∧ Profesor(f) : (∃²a | Asignatura(a) : (p, a, f) ∈ dicta))</code>", "Con agregación: <code>(∀c | c ∈ CERTIFICACION : c.horasTotales = c.horasTeoricas + c.horasPracticas)</code> o <code>Σ</code> sobre un conjunto cuando se suman muchas instancias."] },
+      { t: "Errores que la profesora descuenta", p: "Vistos en entregas anteriores:", list: ["Usar una variable fuera del paréntesis del ∃ que la declaró.", "No exigir x ≠ x' al comparar dos del mismo conjunto.", "Huecos en los bordes: «menor: edad ≥ 18 prohibido» y «mayor: edad ≤ 18 prohibido» deja fuera a quien tiene 18.", "Escribir algo que el diagrama ya garantiza (viola minimalidad).", "Fórmulas que no dicen lo que dice la regla (olvidar comparar la fecha)."] }
+    ],
+    cards: [
+      ["Lee: (∀x | rango : cuerpo)", "Para todo x que cumpla el rango, se cumple el cuerpo."],
+      ["¬(∃a | R : P) equivale a…", "(∀a | R : ¬P)."],
+      ["∃ₙ (n abajo)", "Al menos n."],
+      ["∃ⁿ (n arriba)", "A lo más n."],
+      ["∃!ₙ", "Exactamente n."],
+      ["∃ₙᵐ", "Entre n y m."],
+      ["¿Qué significa c[ESTADO]?", "La entidad del conjunto ESTADO que participa en la instancia c de la interrelación."],
+      ["¿Cómo se refiere un rol en corchetes?", "c[Conjunto, rol], por ejemplo e[Asignatura, req]."],
+      ["Condición para que dos intervalos se solapen", "a.inicio < b.fin ∧ b.inicio < a.fin."],
+      ["¿Qué falta casi siempre al comparar dos del mismo conjunto?", "La condición x ≠ x'."],
+      ["Agregaciones permitidas", "Σ, Π, AVG, MIN y MAX."],
+      ["¿Se pueden usar nombres de conjuntos como variables?", "No; son constantes del lenguaje."]
+    ],
+    quiz: [
+      ["«La calificación de toda evaluación está entre 1 y 5». ¿Cuál fórmula es correcta?", ["(∀v | v ∈ EVALUACION : 1 ≤ v.calificacion ∧ v.calificacion ≤ 5)", "(∃v | v ∈ EVALUACION : 1 ≤ v.calificacion ∧ v.calificacion ≤ 5)", "(∀v | v ∈ EVALUACION : 1 ≤ v.calificacion ∨ v.calificacion ≤ 5)", "¬(∀v | v ∈ EVALUACION : v.calificacion < 1 ∧ v.calificacion > 5)"], "∀ para «toda»; ∧ porque deben cumplirse ambos bordes. Con ∨ cualquier número pasa."],
+      ["¿Cuál fórmula equivale a ¬(∃a | a ∈ Asignatura : a.TrimAp > 15 ∨ a.TrimAp < 1)?", ["(∀a | a ∈ Asignatura : a.TrimAp ≥ 1 ∧ a.TrimAp ≤ 15)", "(∀a | a ∈ Asignatura : a.TrimAp ≤ 15 ∨ a.TrimAp ≥ 1)", "(∃a | a ∈ Asignatura : a.TrimAp ≤ 15 ∧ a.TrimAp ≥ 1)", "(∀a | a ∈ Asignatura : a.TrimAp > 15 ∧ a.TrimAp < 1)"], "¬∃ se vuelve ∀ con el cuerpo negado; por De Morgan, ¬(A ∨ B) = ¬A ∧ ¬B."],
+      ["«No existe una asignatura que sea requisito de sí misma»", ["¬(∃a | a ∈ Asignatura : (a, a) ∈ es_requisito)", "(∀a | a ∈ Asignatura : (a, a) ∈ es_requisito)", "(∃a | a ∈ Asignatura : (a, a) ∉ es_requisito)", "¬(∀a | a ∈ Asignatura : (a, a) ∈ es_requisito)"], "Ejemplo 2 del material."],
+      ["¿Qué significa ∃² a | Asignatura(a) : (p, a, f) ∈ dicta?", ["Existen a lo más 2 asignaturas que f dicta en p", "Existen al menos 2 asignaturas", "Existen exactamente 2 asignaturas", "Existen 2 profesores"], "n arriba = a lo más."],
+      ["¿Cuál cuantificador expresa «al menos 3»?", ["∃₃", "∃³", "∃!₃", "∃₀³"], "n abajo = al menos."],
+      ["¿Qué está mal en: (∀m | m ∈ MEMBRESIA : (∃m' | m' ∈ MEMBRESIA : m'.inicio > m.inicio) ⇒ m.fin = m'.inicio)?", ["m' se usa fuera del paréntesis del ∃ que la declara", "No se puede usar ⇒", "MEMBRESIA no puede ir en el rango", "Falta un Σ"], "Después de cerrar el ∃, m' ya no existe. Además falta m ≠ m'."],
+      ["Para prohibir dos reservas del mismo espacio que choquen en horario, ¿qué condición NO puede faltar?", ["r ≠ r'", "r.fecha ≠ r'.fecha", "r.inicio = r'.inicio", "r[ESPACIO] ≠ r'[ESPACIO]"], "Sin r ≠ r' cada reserva choca consigo misma."],
+      ["Dos reservas [9:00, 11:00] y [10:00, 12:00] del mismo espacio y día. Con la condición a.ini < b.fin ∧ b.ini < a.fin…", ["Se detecta el choque", "No se detecta porque no empiezan a la misma hora", "Solo se detecta si terminan igual", "No aplica a intervalos"], "9 < 12 y 10 < 11: se solapan."],
+      ["«Toda ruta dinámica fue creada por un visitante». Si en el diagrama DINAMICA (1,1) — crea — (0,N) VISITANTE, esta restricción…", ["Ya es implícita: no se escribe en LPO", "Debe escribirse con ∀", "Debe escribirse con ∃!₁", "Es inherente al modelo relacional"], "El (1,1) del diagrama ya lo garantiza."],
+      ["En e[Asignatura, req], ¿qué es «req»?", ["Un rol", "Un atributo", "Una variable", "Un conjunto de entidades"], "La notación de corchetes con dos parámetros es para roles."],
+      ["«El menor de edad tiene menos de 18 años y el mayor tiene 18 o más». ¿Qué par evita huecos?", ["(∀c | c ∈ MENOR : c.edad < 18) y (∀c | c ∈ MAYOR : c.edad ≥ 18)", "(∀c | c ∈ MENOR : c.edad ≤ 18) y (∀c | c ∈ MAYOR : c.edad ≥ 18)", "(∀c | c ∈ MENOR : c.edad < 18) y (∀c | c ∈ MAYOR : c.edad > 18)", "(∃c | c ∈ MENOR : c.edad < 18) y (∃c | c ∈ MAYOR : c.edad ≥ 18)"], "Con ≤/≥ ambos aceptan 18; con </> nadie de 18 cabe."],
+      ["Según la figura del nacimiento, ¿qué fórmula es VERDADERA?", ["(∀b | bebe(b) : (∃!₂ n | nacimiento(n) : n[bebe] = b))", "(∃m | madre(m) : ¬(∃n | nacimiento(n) : n[madre] = m))", "(∀md | medico(md) : (∃n | nacimiento(n) : n[medico] = md))", "(∃b | bebe(b) : (∃!₁ n | nacimiento(n) : n[bebe] = b))"], "Todo bebé está en exactamente 2 tripletas. Las otras tres son las afirmaciones falsas del material.", { t: "tern", a: "MADRE", ca: "(2,N)", b: "BEBE", cb: "(2,2)", c: "MEDICO", cc: "(0,300)", r: "Nacimiento" }],
+      ["«Una madre puede ser atendida por el mismo médico en a lo más tres nacimientos». ¿Qué cuantificador va en el cuerpo?", ["∃³ n | nacimiento(n) : n[madre] = m ∧ n[médico] = md", "∃₃ n | …", "∃!₃ n | …", "∀n | …"], "A lo más 3: el 3 arriba."],
+      ["¿Cuál de estos NO está permitido como variable en el lenguaje?", ["EXPERIENCIA", "e", "x₁", "md"], "Los nombres de conjuntos son constantes."]
+    ]
+  },
+
+  /* ============================================================ 7 */
+  {
+    id: "rel", name: "Modelo relacional y tuplas", src: "Unidad III · Elmasri cap. 5", hue: 175,
+    blurb: "Dominio, atributo, tupla, relación, esquema vs. instancia, superclave, clave, NULL y las restricciones de clave, entidad e integridad referencial.",
+    concepts: [
+      { t: "Vocabulario", p: "En el modelo relacional:", list: ["<b>Dominio</b>: conjunto de valores atómicos (cédulas, fechas, {'activa','resuelta'}).", "<b>Esquema de relación</b> R(A₁, …, Aₙ): nombre + atributos. <b>Grado</b> (aridad) = n.", "<b>Tupla</b>: una fila, lista de n valores. <b>Relación</b> (instancia o estado r(R)): <b>conjunto</b> de tuplas.", "Esquema = estructura (cambia poco). Instancia = datos en un momento (cambia siempre)."] },
+      { t: "Propiedades de una relación", p: "Como una relación es un <b>conjunto</b>:", list: ["No hay <b>tuplas duplicadas</b>.", "Las tuplas <b>no tienen orden</b>.", "Cada valor es <b>atómico</b> (no multivaluado, no compuesto): restricción inherente.", "<b>NULL</b> significa valor desconocido, que no aplica o que no existe."] },
+      { t: "Superclave y clave", p: "Una <b>superclave</b> es un conjunto de atributos que no se repite en ninguna instancia válida. Una <b>clave</b> es una superclave <b>mínima</b>: si quitas un atributo, deja de ser superclave.", list: ["Toda relación tiene al menos una superclave: el conjunto de <b>todos</b> sus atributos.", "<b>Claves candidatas</b>: todas las claves. <b>Primaria</b>: la elegida (subrayada). Las demás se declaran UNIQUE (claves alternas).", "Una instancia puede <b>refutar</b> una clave (dos tuplas con el mismo valor) pero nunca <b>probarla</b>: la clave sale del significado de los datos."], tip: "En la pregunta de tuplas del parcial, resuélvela con tablas concretas: escribe tuplas y señala cuál viola qué." },
+      { t: "Restricciones del modelo relacional", p: "Basadas en el esquema:", list: ["<b>Dominio</b>: cada valor pertenece al dominio de su atributo (CHECK, tipo de dato).", "<b>Clave</b>: no hay dos tuplas con la misma clave.", "<b>NOT NULL</b>: el atributo no admite nulos.", "<b>Integridad de entidad</b>: ningún atributo de la clave primaria es NULL.", "<b>Integridad referencial</b>: una FK vale NULL o coincide con la PK de una tupla existente en la relación referenciada."] },
+      { t: "Qué puede violar cada operación", p: "Clave para la parte de «¿qué ocurre?»:", list: ["<b>INSERT</b>: dominio, clave, integridad de entidad, integridad referencial (la FK apunta a algo que no existe).", "<b>DELETE</b>: solo integridad referencial (borrar algo que otros referencian). Opciones: <b>RESTRICT/NO ACTION</b> (rechaza), <b>CASCADE</b> (borra también las que referencian), <b>SET NULL</b>, <b>SET DEFAULT</b>.", "<b>UPDATE</b> de la PK: como borrar + insertar. De una FK: referencial. De otro atributo: dominio o NOT NULL."] },
+      { t: "Clave foránea", p: "Un conjunto de atributos FK de R1 <b>referencia</b> a R2 si tiene el mismo dominio que la PK de R2 y cada valor de FK es NULL o existe como PK en R2. Una FK puede apuntar a la propia relación (recursiva: empleado → supervisor)." }
+    ],
+    cards: [
+      ["¿Qué es el grado de una relación?", "El número de atributos de su esquema."],
+      ["Esquema vs. instancia", "Esquema: la estructura R(A₁..Aₙ). Instancia: el conjunto de tuplas en un momento dado."],
+      ["¿Por qué no hay tuplas duplicadas?", "Porque una relación es un conjunto."],
+      ["Superclave", "Conjunto de atributos que no se repite en ninguna instancia válida."],
+      ["Clave", "Superclave mínima: no le sobra ningún atributo."],
+      ["¿Cuál es la superclave que toda relación tiene?", "El conjunto de todos sus atributos."],
+      ["Integridad de entidad", "La clave primaria no puede tener valores NULL."],
+      ["Integridad referencial", "La FK es NULL o coincide con una PK existente en la relación referenciada."],
+      ["¿Qué restricción puede violar un DELETE?", "Solo la integridad referencial."],
+      ["Opciones ante un DELETE referenciado", "RESTRICT/NO ACTION, CASCADE, SET NULL, SET DEFAULT."],
+      ["¿Una instancia puede probar que un atributo es clave?", "No; solo puede refutarlo si muestra un valor repetido."]
+    ],
+    quiz: [
+      ["En la instancia mostrada, ¿cuál atributo NO puede ser clave?", ["nombre", "cedula", "correo", "Cualquiera puede serlo"], "Dos tuplas tienen nombre «Ana»: la instancia refuta esa clave.", { t: "tbl", tables: [{ n: "VISITANTE", c: ["cedula", "nombre", "correo"], r: [["V-101", "Ana", "ana@x.com"], ["V-102", "Luis", "luis@x.com"], ["V-103", "Ana", "ana2@x.com"]] }] }],
+      ["R(A, B, C) tiene clave {A}. ¿Cuál de estas es superclave pero NO clave?", ["{A, B}", "{A}", "{B, C}", "{C}"], "Contiene la clave y le sobra B."],
+      ["¿Cuál afirmación sobre una relación es FALSA?", ["Las tuplas tienen un orden fijo que forma parte de la relación", "No hay tuplas duplicadas", "Los valores son atómicos", "Puede haber valores NULL fuera de la PK"], "Una relación es un conjunto: sin orden."],
+      ["Insertar en PARADA una tupla con codigo_via = 'V-99' cuando no existe la vía V-99 viola…", ["La integridad referencial", "La integridad de entidad", "La restricción de clave", "La de dominio"], "La FK apunta a algo que no existe."],
+      ["Insertar una tupla con la PK en NULL viola…", ["La integridad de entidad", "La integridad referencial", "La de dominio", "Ninguna"], "La PK nunca es nula."],
+      ["¿Qué restricciones puede violar un DELETE?", ["Solo la integridad referencial", "Clave e integridad de entidad", "Dominio", "Todas"], "Borrar no crea valores nuevos."],
+      ["Se borra la vía V-1 y la FK de PARADA está declarada ON DELETE CASCADE. ¿Qué ocurre?", ["Se borra la vía y también las paradas que la referencian", "Se rechaza el borrado", "Las paradas quedan con codigo_via NULL", "Solo se borra la vía"], "CASCADE propaga el borrado."],
+      ["La FK es ON DELETE SET NULL pero codigo_via está declarada NOT NULL. Al borrar una vía referenciada…", ["Falla: no puede poner NULL en una columna NOT NULL", "Pone NULL igual", "Borra las paradas", "Ignora la FK"], "SET NULL choca con NOT NULL."],
+      ["¿Cuántas tuplas puede tener como máximo una instancia de R(A, B) con dom(A) = {1,2} y dom(B) = {x,y,z} si la clave es {A}?", ["2", "6", "3", "5"], "Solo puede haber una tupla por valor de A."],
+      ["Y si la clave fuera {A, B}, ¿cuántas como máximo?", ["6", "2", "3", "9"], "2 × 3 combinaciones distintas."],
+      ["Un atributo multivaluado no puede guardarse tal cual en una relación porque…", ["Los valores deben ser atómicos (restricción inherente)", "Viola la integridad referencial", "Viola la integridad de entidad", "Sí puede guardarse"], "Por eso se crea una relación aparte al traducir."],
+      ["¿Qué es una clave candidata no elegida como primaria?", ["Una clave alterna, que se declara UNIQUE", "Una superclave no mínima", "Una clave foránea", "Un índice"], "Ejemplo: razon_social de COMERCIO cuando la PK es rif."]
+    ]
+  },
+
+  /* ============================================================ 8 */
+  {
+    id: "mapeo", name: "Traducción ER → relacional", src: "Elmasri cap. 9 (pasos 1-9)", hue: 330,
+    blurb: "Los 9 pasos para traducir entidades, débiles, 1:1, 1:N, M:N, multivaluados, n-arias, especializaciones y categorías, y cómo listar las restricciones que salen.",
+    concepts: [
+      { t: "Paso 1: entidades fuertes", p: "Una relación por entidad con sus atributos <b>simples</b>. De un compuesto solo quedan las partes. La clave elegida es la <b>PK</b>; las otras candidatas, UNIQUE. Los multivaluados y derivados no van aquí.", list: ["VISITANTE(<u>nro_documento</u>, nombres, apellidos, pais_origen, …)"] },
+      { t: "Paso 2: entidades débiles", p: "Relación con los atributos de la débil + la <b>PK del propietario como FK</b>. PK = PK del propietario + clave parcial. Normalmente ON DELETE CASCADE.", list: ["ESTADO(<u>nombre</u>)", "MUNICIPIO(<u>nombre_estado, nombre</u>), nombre_estado FK → ESTADO", "PARROQUIA(<u>nombre_estado, nombre_municipio, nombre</u>), FK (nombre_estado, nombre_municipio) → MUNICIPIO"] },
+      { t: "Paso 3: binarias 1:1", p: "Tres opciones: <b>FK</b> en una de las dos (mejor en la de participación total), <b>fusionar</b> ambas en una relación (si las dos son totales) o una <b>relación cruzada</b>." },
+      { t: "Paso 4: binarias 1:N", p: "La <b>FK va en el lado N</b>, es decir, en la entidad con <b>máx = 1</b> en (min,max). Los atributos de la interrelación van con la FK. Si ese lado tiene mín = 1, la FK es <b>NOT NULL</b>.", list: ["PARADA (1,1) — ubicada_en — (0,N) VIA → PARADA(<u>codigo</u>, …, codigo_via NOT NULL FK → VIA)"] },
+      { t: "Paso 5: binarias M:N", p: "Nueva relación con las PK de ambas como FK; su PK es la <b>combinación</b>. Los atributos de la interrelación van aquí.", list: ["clasifica(<u>id_hito, nombre_categoria</u>)"], tip: "Si un lado tiene mín = 1 (todo hito tiene categoría), esa obligación NO la garantiza la tabla: queda como restricción explícita del modelo relacional." },
+      { t: "Paso 6: atributos multivaluados", p: "Nueva relación con el atributo y la PK de la entidad como FK. PK = ambos.", list: ["GUIA_IDIOMA(<u>rtn, licencia, idioma</u>), (rtn, licencia) FK → GUIA"] },
+      { t: "Paso 7: n-arias (n > 2)", p: "Nueva relación con las PK de todas las participantes como FK. PK = combinación (si alguna participa con máx 1, su FK sola puede bastar como clave)." },
+      { t: "Paso 8: especialización / generalización", p: "Cuatro opciones:", list: ["<b>8A</b>: relación para la superclase y una por subclase con la misma PK (FK a la superclase). Sirve siempre.", "<b>8B</b>: solo relaciones para las subclases, cada una con todos los atributos heredados. Solo si es <b>total</b> (y mejor disjunta).", "<b>8C</b>: una sola relación con un atributo <b>tipo</b> (disjunta). Genera NULLs.", "<b>8D</b>: una sola relación con un booleano por subclase (solapada)."] },
+      { t: "Paso 9: categorías (unión)", p: "Si las superclases tienen claves distintas, se crea una <b>clave sustituta</b> (id_punto) para la categoría y se agrega como FK en cada superclase. Si comparten la clave, no hace falta." },
+      { t: "Restricciones que salen de la traducción", p: "En el parcial piden enumerar las restricciones del modelo lógico y traducir algunas:", list: ["Clave de cada relación (unicidad).", "Integridad referencial de cada FK.", "NOT NULL que vienen de mín = 1.", "Participaciones totales en M:N que la tabla no garantiza: «todo hito aparece al menos una vez en clasifica».", "Disjunción y totalidad de especializaciones (opción 8A): ningún id en dos subclases; todo id de la superclase en alguna subclase.", "Las explícitas del ER, ahora sobre tablas."] }
+    ],
+    cards: [
+      ["¿Qué pasa con un atributo compuesto al traducir?", "Se guardan solo sus partes simples."],
+      ["PK de una débil traducida", "PK del propietario + clave parcial."],
+      ["¿Dónde va la FK en una 1:N?", "En la relación del lado con máx = 1 (lado N de la 1:N)."],
+      ["¿Cuándo esa FK es NOT NULL?", "Cuando ese lado tiene mín = 1 (participación total)."],
+      ["¿Cómo se traduce una M:N?", "Nueva relación con las dos PK como FK; su PK es la combinación."],
+      ["¿Cómo se traduce un multivaluado?", "Nueva relación (PK entidad, valor) con PK compuesta por ambos."],
+      ["Opción 8A", "Una relación para la superclase y una por subclase con la misma PK como FK."],
+      ["¿Cuándo vale la opción 8B?", "Solo si la especialización es total."],
+      ["Opción 8C vs. 8D", "8C: una tabla con atributo tipo (disjunta). 8D: una tabla con banderas booleanas (solapada)."],
+      ["¿Qué es una clave sustituta en una categoría?", "Un identificador nuevo para la categoría, agregado como FK en cada superclase."],
+      ["¿La tabla de una M:N garantiza un mín = 1?", "No; queda como restricción explícita en el relacional."]
+    ],
+    quiz: [
+      ["¿Cómo se traduce este diagrama?", ["PARADA lleva codigo_via como FK NOT NULL hacia VIA", "VIA lleva codigo_parada como FK", "Se crea la relación ubicada_en(codigo_parada, codigo_via)", "Se fusionan PARADA y VIA"], "1:N: la FK va en el lado con máx 1, y mín 1 la hace NOT NULL.", { t: "bin", a: "PARADA", ca: "(1,1)", r: "ubicada_en", cb: "(0,N)", b: "VIA" }],
+      ["¿Cuál es la PK de MUNICIPIO al traducir?", ["(nombre_estado, nombre)", "nombre", "nombre_estado", "Un id autogenerado obligatorio"], "PK del propietario + clave parcial.", { t: "bin", a: "ESTADO", ca: "(1,N)", r: "tiene", rid: 1, cb: "(1,1)", b: "MUNICIPIO", bw: 1 }],
+      ["HITO (1,N) — clasifica — (0,N) CATEGORIA se traduce…", ["Con una relación clasifica(id_hito, nombre_categoria) con PK compuesta", "Con una FK en HITO", "Con una FK en CATEGORIA", "Fusionando HITO y CATEGORIA"], "Es M:N."],
+      ["En esa M:N, la obligación «todo hito tiene al menos una categoría»…", ["No la garantiza la tabla; se escribe como restricción explícita del relacional", "La garantiza la PK compuesta", "La garantiza la FK", "Se pierde y no importa"], "Una FK no obliga a que exista al menos una fila."],
+      ["El atributo multivaluado idiomas de GUIA (clave rtn + licencia) se traduce como…", ["GUIA_IDIOMA(rtn, licencia, idioma) con PK de los tres", "Una columna idiomas en GUIA", "GUIA_IDIOMA(idioma) con PK idioma", "GUIA_IDIOMA(rtn, idioma)"], "La PK incluye la clave completa del guía y el valor."],
+      ["Especialización parcial de PERSONA en GUIA y VISITANTE. ¿Qué opción NO sirve?", ["8B: solo tablas para las subclases", "8A: tabla para la superclase y una por subclase", "8D: una tabla con banderas", "8C con NULLs"], "8B pierde a las personas que no son de ninguna subclase."],
+      ["Especialización disjunta y total de RUTA en FIJA y DINAMICA con 8A. ¿Qué restricción queda explícita?", ["Todo id de RUTA aparece exactamente en una de FIJA o DINAMICA", "La PK de RUTA no es nula", "FIJA no puede tener atributos", "Ninguna"], "Las tablas no garantizan disjunción ni totalidad."],
+      ["Categoría PUNTO_ITINERARIO = ∪(HITO, PARADA), con claves distintas. ¿Cómo se traduce?", ["Se crea una clave sustituta id_punto y se agrega como FK en HITO y en PARADA", "Se fusionan HITO y PARADA", "PUNTO_ITINERARIO hereda ambas PK como su PK", "No se traduce"], "Paso 9 de Elmasri."],
+      ["¿Dónde van los atributos de una interrelación 1:N?", ["En la relación que recibe la FK", "En una relación nueva siempre", "En el lado con máx N", "Se pierden"], "Viajan junto con la FK."],
+      ["Una ternaria con PK formada por las tres FK se usa cuando…", ["Todas las participantes tienen máx N", "Una tiene máx 1", "Es recursiva", "Es identificante"], "Si alguna tiene máx 1 la clave puede ser menor."],
+      ["Un atributo compuesto ubicacion(latitud, longitud, elevacion) en la relación queda como…", ["Tres columnas: latitud, longitud, elevacion", "Una columna ubicacion de texto", "Una tabla aparte", "No se guarda"], "Solo se guardan las partes simples."],
+      ["Una 1:1 donde un lado es total se traduce mejor…", ["Poniendo la FK en el lado de participación total", "Con relación cruzada siempre", "Poniendo la FK en el lado parcial", "Con dos FK cruzadas"], "Así se evitan NULLs."]
+    ]
+  },
+
+  /* ============================================================ 9 */
+  {
+    id: "sql", name: "Tablas y SQL: ¿qué ocurre?", src: "Elmasri cap. 6 · práctica de integridad", hue: 110,
+    blurb: "CREATE TABLE con PRIMARY KEY, FOREIGN KEY, UNIQUE, NOT NULL, CHECK y acciones ON DELETE / ON UPDATE, para predecir qué hace cada INSERT, UPDATE o DELETE.",
+    concepts: [
+      { t: "Restricciones en CREATE TABLE", p: "Cómo se declara cada una:", list: ["<code>PRIMARY KEY (a, b)</code>: única y no nula.", "<code>UNIQUE (correo)</code>: clave alterna; en SQL estándar admite NULL.", "<code>NOT NULL</code>: obligatorio.", "<code>CHECK (calificacion BETWEEN 1 AND 5)</code>: dominio.", "<code>FOREIGN KEY (codigo_via) REFERENCES VIA(codigo) ON DELETE CASCADE</code>."] },
+      { t: "Acciones referenciales", p: "Qué hace el SGBD cuando se borra o modifica una fila referenciada:", list: ["<b>NO ACTION / RESTRICT</b> (por defecto): rechaza la operación.", "<b>CASCADE</b>: borra (o actualiza) también las filas que la referencian.", "<b>SET NULL</b>: pone la FK en NULL (falla si la FK es NOT NULL o parte de la PK).", "<b>SET DEFAULT</b>: pone el valor por defecto (que debe existir en la referenciada)."] },
+      { t: "Cómo resolver un «¿qué ocurre?»", p: "Método en 4 preguntas por operación:", list: ["1. ¿Repite una PK o un UNIQUE? → violación de clave.", "2. ¿Deja NULL una PK o una columna NOT NULL? → entidad / NOT NULL.", "3. ¿Cumple los CHECK? → dominio.", "4. ¿Una FK queda apuntando a algo inexistente? Si es INSERT/UPDATE de la FK → se rechaza. Si es DELETE/UPDATE de la PK referenciada → aplica la acción declarada.", "Si una cascada llega a otra tabla, repite el análisis allí."], tip: "Las operaciones se evalúan en orden y cada una parte del estado que dejó la anterior (si la anterior falló, no cambió nada)." }
+    ],
+    cards: [
+      ["Acción por defecto de una FK", "NO ACTION / RESTRICT: rechaza borrar o actualizar si hay referencias."],
+      ["¿Cuándo falla ON DELETE SET NULL?", "Cuando la FK es NOT NULL o forma parte de la PK."],
+      ["¿UNIQUE permite NULL?", "Sí en SQL estándar; PRIMARY KEY no."],
+      ["Insertar con FK inexistente", "Se rechaza: viola integridad referencial."],
+      ["Borrar una fila no referenciada", "Se ejecuta sin problema."],
+      ["UPDATE de una PK referenciada con ON UPDATE CASCADE", "Se actualiza la PK y también las FK que la referencian."]
+    ],
+    quiz: [
+      ["Con este estado, ¿qué ocurre con: INSERT INTO PARADA VALUES ('P-3', 'Chacaíto', 'V-9')?", ["Se rechaza: V-9 no existe en VIA", "Se ejecuta", "Se rechaza por PK duplicada", "Se crea la vía V-9 automáticamente"], "La FK debe apuntar a una vía existente.", { t: "tbl", ddl: "VIA(codigo PK, nombre)\nPARADA(codigo PK, nombre, codigo_via NOT NULL FK → VIA ON DELETE CASCADE)", tables: [{ n: "VIA", c: ["codigo", "nombre"], r: [["V-1", "Av. Libertador"], ["V-2", "Bulevar Sabana Grande"]] }, { n: "PARADA", c: ["codigo", "nombre", "codigo_via"], r: [["P-1", "Bello Monte", "V-1"], ["P-2", "Plaza Venezuela", "V-2"]] }] }],
+      ["Mismo estado. ¿Qué ocurre con: DELETE FROM VIA WHERE codigo = 'V-1'?", ["Se borra V-1 y en cascada la parada P-1", "Se rechaza porque P-1 la referencia", "P-1 queda con codigo_via NULL", "Solo se borra V-1"], "La FK está declarada ON DELETE CASCADE.", { t: "tbl", ddl: "VIA(codigo PK, nombre)\nPARADA(codigo PK, nombre, codigo_via NOT NULL FK → VIA ON DELETE CASCADE)", tables: [{ n: "VIA", c: ["codigo", "nombre"], r: [["V-1", "Av. Libertador"], ["V-2", "Bulevar Sabana Grande"]] }, { n: "PARADA", c: ["codigo", "nombre", "codigo_via"], r: [["P-1", "Bello Monte", "V-1"], ["P-2", "Plaza Venezuela", "V-2"]] }] }],
+      ["Ahora la FK no declara acción (NO ACTION). ¿Qué ocurre con DELETE FROM VIA WHERE codigo = 'V-2'?", ["Se rechaza: P-2 referencia a V-2", "Se borra V-2 y P-2", "Se borra V-2 y P-2 queda en NULL", "Se ejecuta sin problema"], "Por defecto se rechaza.", { t: "tbl", ddl: "VIA(codigo PK, nombre)\nPARADA(codigo PK, nombre, codigo_via NOT NULL FK → VIA)", tables: [{ n: "VIA", c: ["codigo", "nombre"], r: [["V-1", "Av. Libertador"], ["V-2", "Bulevar Sabana Grande"]] }, { n: "PARADA", c: ["codigo", "nombre", "codigo_via"], r: [["P-1", "Bello Monte", "V-1"], ["P-2", "Plaza Venezuela", "V-2"]] }] }],
+      ["¿Qué ocurre con: INSERT INTO EVALUACION VALUES ('E-3', 'V-101', 7)?", ["Se rechaza: viola el CHECK de la calificación", "Se ejecuta", "Viola la PK", "Viola la FK"], "7 no está entre 1 y 5.", { t: "tbl", ddl: "EVALUACION(codigo PK, visitante FK → VISITANTE, calificacion CHECK (calificacion BETWEEN 1 AND 5))", tables: [{ n: "EVALUACION", c: ["codigo", "visitante", "calificacion"], r: [["E-1", "V-101", "5"], ["E-2", "V-102", "3"]] }] }],
+      ["¿Qué ocurre con: INSERT INTO COMERCIO VALUES ('J-3', 'Café Ávila')?", ["Se rechaza: razon_social es UNIQUE y ya existe", "Se ejecuta", "Viola la PK", "Viola NOT NULL"], "Clave alterna repetida.", { t: "tbl", ddl: "COMERCIO(rif PK, razon_social UNIQUE NOT NULL)", tables: [{ n: "COMERCIO", c: ["rif", "razon_social"], r: [["J-1", "Café Ávila"], ["J-2", "Posada El Tisure"]] }] }],
+      ["¿Qué ocurre con: UPDATE PARADA SET codigo_via = NULL WHERE codigo = 'P-1'?", ["Se rechaza: codigo_via es NOT NULL", "Se ejecuta: una FK siempre admite NULL", "Se borra P-1", "Viola la PK"], "Una FK admite NULL solo si la columna no es NOT NULL.", { t: "tbl", ddl: "VIA(codigo PK, nombre)\nPARADA(codigo PK, nombre, codigo_via NOT NULL FK → VIA)", tables: [{ n: "VIA", c: ["codigo", "nombre"], r: [["V-1", "Av. Libertador"]] }, { n: "PARADA", c: ["codigo", "nombre", "codigo_via"], r: [["P-1", "Bello Monte", "V-1"]] }] }],
+      ["¿Qué ocurre con: INSERT INTO MUNICIPIO VALUES ('Miranda', 'Sucre')?", ["Se rechaza: la PK (estado, nombre) ya existe", "Se ejecuta porque Sucre también está en otro estado", "Viola la FK", "Viola el dominio"], "La combinación Miranda + Sucre ya está.", { t: "tbl", ddl: "ESTADO(nombre PK)\nMUNICIPIO(estado, nombre, PK (estado, nombre), estado FK → ESTADO)", tables: [{ n: "ESTADO", c: ["nombre"], r: [["Miranda"], ["Sucre"]] }, { n: "MUNICIPIO", c: ["estado", "nombre"], r: [["Miranda", "Sucre"], ["Sucre", "Sucre"]] }] }],
+      ["Y con: INSERT INTO MUNICIPIO VALUES ('Zulia', 'Sucre')?", ["Se rechaza: Zulia no existe en ESTADO", "Se ejecuta", "Viola la PK", "Se crea el estado Zulia"], "La FK estado apunta a algo inexistente.", { t: "tbl", ddl: "ESTADO(nombre PK)\nMUNICIPIO(estado, nombre, PK (estado, nombre), estado FK → ESTADO)", tables: [{ n: "ESTADO", c: ["nombre"], r: [["Miranda"], ["Sucre"]] }, { n: "MUNICIPIO", c: ["estado", "nombre"], r: [["Miranda", "Sucre"], ["Sucre", "Sucre"]] }] }]
+    ]
+  }
+]);
+
+/* ---------- Laboratorio: lector de (min,max) ---------- */
+window.LECTOR_PAIRS = [
+  ["PARADA", "ubicada_en", "VIA"], ["HITO", "clasifica", "CATEGORIA"], ["CREDENCIAL", "adquiere", "VISITANTE"],
+  ["EXPERIENCIA", "dirige", "GUIA"], ["CURSO", "imparte", "INSTRUCTOR"], ["OBJETO_ARTE", "crea", "ARTISTA"],
+  ["UNIDAD", "pertenece", "INMUEBLE"], ["HABITACION", "es_de", "TIPO_HAB"], ["SOLICITUD", "formaliza", "TRABAJADOR"],
+  ["INCIDENCIA", "afecta", "VIA"], ["GRUPO", "integra", "ARTISTA"], ["EVENTO", "programa", "HITO"]
+];
+
+/* ---------- Laboratorio: clasificar restricción ---------- */
+window.CLASSIFY = [
+  ["En el modelo relacional cada celda guarda un único valor atómico.", "inh"],
+  ["Una relación no puede tener dos tuplas idénticas.", "inh"],
+  ["En una relación, las tuplas no tienen orden.", "inh"],
+  ["Cada parada está en exactamente una vía: PARADA (1,1) en ubicada_en.", "imp"],
+  ["Un municipio se identifica por su estado y su nombre (entidad débil).", "imp"],
+  ["Toda ruta es fija o dinámica, nunca ambas (círculo d con doble línea).", "imp"],
+  ["El rif identifica a cada comercio (atributo subrayado).", "imp"],
+  ["Un objeto de arte tiene a lo sumo un artista: OBJETO (0,1) en crea.", "imp"],
+  ["Cada bebé aparece en exactamente dos tripletas de Nacimiento: BEBE (2,2).", "imp"],
+  ["La fecha de vencimiento de una experiencia es posterior a su fecha de activación.", "exp"],
+  ["La calificación de una evaluación va de 1 a 5.", "exp"],
+  ["Un visitante solo evalúa rutas cuyo recorrido completó.", "exp"],
+  ["El presupuesto de un centro está entre la cuota mínima y máxima de su estado y nivel.", "exp"],
+  ["La nota mínima de aprobación de la evaluación práctica es 85.", "exp"],
+  ["La participación de un artista en una edición ocurre dentro de su periodo en el grupo.", "exp"],
+  ["Una credencial solo se canjea una vez y dentro del horario autorizado.", "exp"],
+  ["La fecha de devolución de un préstamo es posterior a la de recepción.", "exp"],
+  ["Un profesor no dicta más de dos asignaturas en un mismo período.", "exp"]
+];
+
+/* ---------- Laboratorio: arma la fórmula ---------- */
+window.LPO_BUILD = [
+  { id: "venc", name: "Vencimiento de experiencia", nl: "La fecha de vencimiento de toda experiencia es posterior a su fecha de activación.", items: ["(∀e |", "e ∈ EXPERIENCIA", ":", "e.fechaVencimiento > e.fechaActivacion", ")"] },
+  { id: "req", name: "Requisito de sí misma", nl: "No existe una asignatura que sea requisito de sí misma.", items: ["¬", "(∃a |", "a ∈ Asignatura", ":", "(a, a) ∈ es_requisito", ")"] },
+  { id: "cal", name: "Calificación 1 a 5", nl: "La calificación de toda evaluación está entre 1 y 5.", items: ["(∀v |", "v ∈ EVALUACION :", "1 ≤ v.calificacion", "∧", "v.calificacion ≤ 5", ")"] },
+  { id: "bebe", name: "Dos tripletas por bebé", nl: "Todo bebé participa en exactamente dos tripletas de nacimiento.", items: ["(∀b |", "bebe(b) :", "(∃!₂ n |", "nacimiento(n) :", "n[bebe] = b", "))"] },
+  { id: "prof", name: "A lo más dos asignaturas", nl: "Un profesor dicta a lo más dos asignaturas en un mismo período.", items: ["(∀p, f |", "Período(p) ∧ Profesor(f) :", "(∃²a |", "Asignatura(a) :", "(p, a, f) ∈ dicta", "))"] },
+  { id: "choque", name: "Reservas sin choque", nl: "No existen dos reservas distintas del mismo espacio y día cuyos horarios se solapen.", items: ["¬(∃r, r' |", "r ∈ reserva ∧ r' ∈ reserva", "∧ r ≠ r'", "∧ r[ESPACIO] = r'[ESPACIO] ∧ r.fecha = r'.fecha", ":", "r.inicio < r'.fin", "∧ r'.inicio < r.fin", ")"] },
+  { id: "eval", name: "Solo evalúa quien completó", nl: "Toda evaluación de un visitante sobre una ruta corresponde a un recorrido completado de esa ruta por ese visitante.", items: ["(∀e | e ∈ evalua :", "(∃r | r ∈ realiza :", "r[VISITANTE] = e[VISITANTE]", "∧ r[RUTA] = e[RUTA]", "∧ r.completado = verdadero", "))"] }
+];
+
+/* ---------- Laboratorio: ¿qué ocurre? ---------- */
+window.OUTCOMES = {
+  ok: "Se ejecuta sin problema",
+  pk: "Rechazada: clave primaria duplicada",
+  ent: "Rechazada: PK nula (integridad de entidad)",
+  nn: "Rechazada: viola NOT NULL",
+  chk: "Rechazada: viola un CHECK (dominio)",
+  uq: "Rechazada: UNIQUE duplicado",
+  fk: "Rechazada: la FK apunta a una fila que no existe",
+  rst: "Rechazada: hay filas que la referencian (NO ACTION)",
+  cas: "Se ejecuta y propaga en cascada",
+  setn: "Se ejecuta y deja la FK en NULL"
+};
+window.SCENARIOS = [
+  {
+    id: "mov", name: "Movilidad (vías y paradas)",
+    ddl: "CREATE TABLE VIA (\n  codigo  VARCHAR(5)  PRIMARY KEY,\n  nombre  VARCHAR(60) NOT NULL,\n  estado  VARCHAR(15) CHECK (estado IN ('operativa','cierre_total'))\n);\nCREATE TABLE PARADA (\n  codigo     VARCHAR(5) PRIMARY KEY,\n  nombre     VARCHAR(60) NOT NULL,\n  tarifa     NUMERIC(6,2) CHECK (tarifa >= 0),\n  codigo_via VARCHAR(5) NOT NULL\n             REFERENCES VIA(codigo) ON DELETE CASCADE\n);",
+    tables: [
+      { n: "VIA", c: ["codigo", "nombre", "estado"], r: [["V-1", "Av. Libertador", "operativa"], ["V-2", "Sendero Sabas Nieves", "operativa"], ["V-3", "Calle Real", "cierre_total"]] },
+      { n: "PARADA", c: ["codigo", "nombre", "tarifa", "codigo_via"], r: [["P-1", "Bello Monte", "0.50", "V-1"], ["P-2", "Plaza Venezuela", "0.50", "V-1"], ["P-3", "Teleférico", "3.00", "V-2"]] }
+    ],
+    ops: [
+      ["INSERT INTO VIA VALUES ('V-4', 'Av. Boyacá', 'operativa');", "ok", "V-4 no existe y todos los valores cumplen las restricciones."],
+      ["INSERT INTO VIA VALUES ('V-1', 'Cota Mil', 'operativa');", "pk", "Ya existe una vía con codigo V-1."],
+      ["INSERT INTO VIA VALUES ('V-5', 'Los Próceres', 'cerrada');", "chk", "'cerrada' no está en ('operativa', 'cierre_total')."],
+      ["INSERT INTO PARADA VALUES ('P-4', 'Chacaíto', 0.50, 'V-7');", "fk", "No existe la vía V-7."],
+      ["INSERT INTO PARADA VALUES ('P-5', 'La Hoyada', -1, 'V-1');", "chk", "La tarifa debe ser ≥ 0."],
+      ["INSERT INTO PARADA VALUES (NULL, 'Capitolio', 0.50, 'V-1');", "ent", "La clave primaria no puede ser nula."],
+      ["DELETE FROM VIA WHERE codigo = 'V-1';", "cas", "Se borra V-1 y, por ON DELETE CASCADE, también P-1 y P-2."],
+      ["DELETE FROM VIA WHERE codigo = 'V-3';", "ok", "Ninguna parada referencia a V-3."],
+      ["UPDATE PARADA SET codigo_via = 'V-3' WHERE codigo = 'P-3';", "ok", "V-3 existe. Que esté en cierre total es una regla de negocio que estas tablas no verifican."],
+      ["UPDATE PARADA SET codigo_via = NULL WHERE codigo = 'P-1';", "nn", "codigo_via está declarada NOT NULL."]
+    ]
+  },
+  {
+    id: "museo", name: "Museo (SET NULL y CASCADE)",
+    ddl: "CREATE TABLE ARTISTA (\n  nombre VARCHAR(40) PRIMARY KEY,\n  pais   VARCHAR(30)\n);\nCREATE TABLE OBJETO (\n  titulo  VARCHAR(60) PRIMARY KEY,\n  epoca   VARCHAR(30) NOT NULL,\n  artista VARCHAR(40) REFERENCES ARTISTA(nombre)\n          ON DELETE SET NULL\n);\nCREATE TABLE PINTURA (\n  titulo  VARCHAR(60) PRIMARY KEY\n          REFERENCES OBJETO(titulo) ON DELETE CASCADE,\n  tecnica VARCHAR(10) CHECK (tecnica IN ('aceite','agua'))\n);",
+    tables: [
+      { n: "ARTISTA", c: ["nombre", "pais"], r: [["Reverón", "Venezuela"], ["Soto", "Venezuela"], ["Cruz-Diez", "Venezuela"]] },
+      { n: "OBJETO", c: ["titulo", "epoca", "artista"], r: [["La cueva", "Moderna", "Reverón"], ["Vibración", "Contemporánea", "Soto"], ["Máscara ritual", "Prehispánica", "NULL"]] },
+      { n: "PINTURA", c: ["titulo", "tecnica"], r: [["La cueva", "aceite"]] }
+    ],
+    ops: [
+      ["DELETE FROM ARTISTA WHERE nombre = 'Soto';", "setn", "Vibración lo referencia y la FK es ON DELETE SET NULL: queda con artista NULL (autor desconocido)."],
+      ["DELETE FROM ARTISTA WHERE nombre = 'Cruz-Diez';", "ok", "Ningún objeto lo referencia."],
+      ["INSERT INTO OBJETO VALUES ('Fisicromía', 'Contemporánea', 'Cruz-Diez');", "ok", "Cruz-Diez existe en el estado inicial."],
+      ["INSERT INTO OBJETO VALUES ('Sin título', 'Moderna', 'Picasso');", "fk", "Picasso no está en ARTISTA."],
+      ["INSERT INTO OBJETO VALUES ('Paisaje', NULL, 'Reverón');", "nn", "epoca es NOT NULL."],
+      ["INSERT INTO PINTURA VALUES ('Vibración', 'acrílico');", "chk", "'acrílico' no está en ('aceite', 'agua')."],
+      ["INSERT INTO PINTURA VALUES ('El Ávila', 'aceite');", "fk", "No existe el objeto 'El Ávila'."],
+      ["DELETE FROM OBJETO WHERE titulo = 'La cueva';", "cas", "Se borra el objeto y, en cascada, su fila en PINTURA."],
+      ["INSERT INTO OBJETO VALUES ('Máscara ritual', 'Colonial', NULL);", "pk", "Ya existe 'Máscara ritual'."],
+      ["UPDATE ARTISTA SET nombre = 'Armando Reverón' WHERE nombre = 'Reverón';", "rst", "La FK no declara ON UPDATE: por defecto NO ACTION, y La cueva referencia a Reverón."]
+    ]
+  },
+  {
+    id: "hotel", name: "Hoteles (débil y cascada bloqueada)",
+    ddl: "CREATE TABLE HOTEL (\n  nombre    VARCHAR(40) PRIMARY KEY,\n  ciudad    VARCHAR(30) NOT NULL,\n  estrellas INT CHECK (estrellas BETWEEN 1 AND 5)\n);\nCREATE TABLE HABITACION (\n  hotel  VARCHAR(40) REFERENCES HOTEL(nombre) ON DELETE CASCADE,\n  numero VARCHAR(5),\n  tipo   VARCHAR(10),\n  PRIMARY KEY (hotel, numero)\n);\nCREATE TABLE RESERVA (\n  id     VARCHAR(5) PRIMARY KEY,\n  hotel  VARCHAR(40),\n  numero VARCHAR(5),\n  cedula VARCHAR(12) NOT NULL,\n  FOREIGN KEY (hotel, numero) REFERENCES HABITACION\n);",
+    tables: [
+      { n: "HOTEL", c: ["nombre", "ciudad", "estrellas"], r: [["Alba", "Caracas", "5"], ["Meliá", "Caracas", "5"], ["Posada Mistafí", "Mérida", "3"]] },
+      { n: "HABITACION", c: ["hotel", "numero", "tipo"], r: [["Alba", "1A", "doble"], ["Meliá", "1A", "simple"], ["Alba", "2B", "suite"]] },
+      { n: "RESERVA", c: ["id", "hotel", "numero", "cedula"], r: [["R-1", "Alba", "1A", "V-101"]] }
+    ],
+    ops: [
+      ["INSERT INTO HABITACION VALUES ('Meliá', '2B', 'doble');", "ok", "La combinación (Meliá, 2B) no existe y Meliá sí."],
+      ["INSERT INTO HABITACION VALUES ('Alba', '1A', 'suite');", "pk", "(Alba, 1A) ya existe."],
+      ["INSERT INTO HOTEL VALUES ('Eurobuilding', 'Caracas', 6);", "chk", "estrellas debe estar entre 1 y 5."],
+      ["INSERT INTO HABITACION VALUES ('Hesperia', '1A', 'doble');", "fk", "No existe el hotel Hesperia."],
+      ["DELETE FROM HOTEL WHERE nombre = 'Posada Mistafí';", "ok", "No tiene habitaciones registradas."],
+      ["DELETE FROM HABITACION WHERE hotel = 'Alba' AND numero = '1A';", "rst", "R-1 referencia esa habitación y la FK de RESERVA es NO ACTION."],
+      ["DELETE FROM HOTEL WHERE nombre = 'Alba';", "rst", "La cascada llega a (Alba, 1A), que R-1 referencia con NO ACTION: se rechaza la operación completa."],
+      ["DELETE FROM HOTEL WHERE nombre = 'Meliá';", "cas", "Se borra Meliá y en cascada (Meliá, 1A), que nadie referencia."],
+      ["INSERT INTO RESERVA VALUES ('R-2', 'Alba', '2B', NULL);", "nn", "cedula es NOT NULL."],
+      ["INSERT INTO HOTEL VALUES (NULL, 'Valencia', 4);", "ent", "La PK no puede ser nula."]
+    ]
+  }
+];
+
+/* ---------- Laboratorio: emparejar ---------- */
+window.PAIRSETS = {
+  simbolos: { name: "Símbolos Chen", pairs: [
+    ["Rectángulo doble", "Entidad débil"], ["Rombo doble", "Interrelación identificante"], ["Óvalo doble", "Atributo multivaluado"],
+    ["Óvalo con borde punteado", "Atributo derivado"], ["Nombre con subrayado punteado", "Clave parcial"], ["Nombre subrayado", "Clave"],
+    ["Doble línea al círculo", "Especialización total"], ["Círculo con d", "Especialización disjunta"], ["Círculo con o", "Especialización solapada"],
+    ["Círculo con ∪", "Categoría (unión)"], ["Óvalo con óvalos hijos", "Atributo compuesto"], ["Óvalo colgado de un rombo", "Atributo de la interrelación"]
+  ] },
+  mapeo: { name: "Traducción", pairs: [
+    ["Entidad fuerte", "Relación con sus atributos simples y su clave como PK"], ["Entidad débil", "PK = PK del propietario + clave parcial"],
+    ["Interrelación 1:N", "FK en la relación del lado con máx = 1"], ["Interrelación M:N", "Relación nueva con PK compuesta por las dos FK"],
+    ["Atributo multivaluado", "Relación nueva (PK de la entidad, valor)"], ["Atributo compuesto", "Solo sus partes simples como columnas"],
+    ["Interrelación ternaria", "Relación nueva con las tres FK"], ["Categoría con claves distintas", "Clave sustituta como FK en cada superclase"],
+    ["Especialización total", "Admite la opción 8B (solo tablas de subclases)"], ["Especialización solapada en una sola tabla", "Opción 8D con banderas booleanas"],
+    ["Mínimo 1 en el lado que recibe la FK", "La FK se declara NOT NULL"]
+  ] },
+  conceptos: { name: "Conceptos", pairs: [
+    ["Superclave", "Conjunto de atributos que no se repite en ninguna instancia válida"], ["Clave", "Superclave mínima"],
+    ["Integridad de entidad", "La PK no puede ser NULL"], ["Integridad referencial", "La FK es NULL o existe como PK en la referenciada"],
+    ["Independencia física", "Mapeo conceptual ↔ interno"], ["Independencia lógica", "Mapeo externo ↔ conceptual"],
+    ["Minimalidad", "Cada requisito aparece una sola vez en el esquema"], ["Compleción", "Universo de discurso ↔ esquema"],
+    ["∃ⁿ", "A lo más n"], ["∃ₙ", "Al menos n"], ["∃!ₙ", "Exactamente n"]
+  ] }
+};
+
+/* ---------- Ejercicios de desarrollo (formato del parcial) ---------- */
+window.EJERCICIOS = [
+  {
+    id: "e1", part: "Parte 1 · Leer un ER", title: "Del diagrama al lenguaje natural",
+    prompt: "Escribe en lenguaje natural todo lo que afirma el diagrama: una oración por cada par (min,max) y qué significa que sea ternaria.",
+    fig: { t: "tern", a: "MADRE", ca: "(2,N)", b: "BEBE", cb: "(2,2)", c: "MEDICO", cc: "(0,300)", r: "Nacimiento" },
+    sol: "<ul><li><b>BEBE (2,2)</b>: cada bebé aparece en exactamente dos tripletas de Nacimiento; es decir, a cada bebé lo atienden dos médicos (con su única madre).</li><li><b>MADRE (2,N)</b>: toda madre aparece al menos en dos tripletas; tiene al menos un bebé registrado y puede tener muchos.</li><li><b>MEDICO (0,300)</b>: un médico puede no haber atendido ningún nacimiento y aparece a lo más en 300 tripletas.</li><li>Es <b>ternaria</b>: cada instancia relaciona a la vez una madre, un bebé y un médico. Tres binarias no dirían qué médico atendió a qué bebé de qué madre.</li><li>Lo que el diagrama NO dice (va en LPO): que cada bebé tenga una única madre, o cuántas veces el mismo médico atiende a la misma madre.</li></ul>"
+  },
+  {
+    id: "e2", part: "Parte 2 · Completar un ER", title: "Museo: completa estructuras y cardinalidades",
+    prompt: "Te dan las entidades OBJETO_ARTE, PINTURA, ESCULTURA, PERMANENTE, PRESTADO y ARTISTA, y el rombo crea. Completa: ¿qué clave tiene cada entidad?, ¿cuántas especializaciones hay y con qué símbolos?, ¿qué pares (min,max) lleva crea?",
+    sol: "<ul><li>OBJETO_ARTE: clave <b>titulo</b>; atributos pais_cultura, epoca, descripcion, anio_creacion (opcional).</li><li>Especialización 1 por tipo técnico: OBJETO_ARTE → PINTURA (tecnica, material_soporte, estilo) y ESCULTURA (material, <i>dimensiones(altura, anchura)</i>, estilo). Círculo <b>d</b> con <b>doble línea</b>: disjunta y total.</li><li>Especialización 2 por propiedad: OBJETO_ARTE → PERMANENTE (fecha_adquisicion, costo, estado) y PRESTADO (coleccion_propietaria, fecha_recepcion, fecha_devolucion). También <b>d</b> y <b>total</b>.</li><li>ARTISTA: clave <b>nombre</b>; fecha_nac, fecha_fallecimiento (opcional), pais, epoca, estilo_principal.</li><li>crea: <b>OBJETO_ARTE (0,1)</b> (autor desconocido o uno solo) y <b>ARTISTA (0,N)</b> (o (1,N) si solo registran artistas con obras; anótalo como supuesto).</li></ul>"
+  },
+  {
+    id: "e3", part: "Parte 3 · Traducir a cuantificadores", title: "Cuatro restricciones de la práctica",
+    prompt: "Escribe en LPO: (a) La fecha de devolución de un objeto prestado es posterior a la de recepción. (b) Si un artista tiene fecha de fallecimiento, es posterior a la de nacimiento. (c) La nota de una evaluación teórica es al menos 75 para aprobar, y la práctica al menos 85 (solo para las evaluaciones marcadas como aprobadas). (d) Un médico atiende nacimientos de a lo más 100 madres distintas.",
+    sol: "<ol><li><code>(∀o | o ∈ PRESTADO : o.fechaDevolucion > o.fechaRecepcion)</code></li><li><code>(∀a | a ∈ ARTISTA ∧ a.fechaFallecimiento ≠ nulo : a.fechaFallecimiento > a.fechaNacimiento)</code></li><li><code>(∀e | e ∈ EVALUACION ∧ e.aprobada = verdadero : (e.tipo = 'teorica' ∧ e.nota ≥ 75) ∨ (e.tipo = 'practica' ∧ e.nota ≥ 85))</code></li><li><code>(∀md | medico(md) : (∃¹⁰⁰ m | madre(m) : (∃n | nacimiento(n) : n[madre] = m ∧ n[medico] = md)))</code> — ∃ con 100 arriba = a lo más 100.</li></ol>"
+  },
+  {
+    id: "e4", part: "Parte 4 · Tuplas (resolver con ejemplos)", title: "Instancias válidas e inválidas",
+    prompt: "Sea INSCRIPCION(cedula, curso, periodo, nota) con clave (cedula, curso, periodo) y nota entre 0 y 100. (a) ¿Es válida la instancia mostrada? (b) ¿Qué conjuntos de atributos refuta como clave? (c) Construye una tupla que viole cada restricción: clave, entidad y dominio.",
+    fig: { t: "tbl", tables: [{ n: "INSCRIPCION", c: ["cedula", "curso", "periodo", "nota"], r: [["V-10", "Electricidad", "2026-1", "80"], ["V-10", "Electricidad", "2026-2", "92"], ["V-11", "Electricidad", "2026-1", "80"], ["V-11", "Soldadura", "2026-1", "75"]] }] },
+    sol: "<ul><li><b>(a)</b> Sí: ninguna combinación (cedula, curso, periodo) se repite, ningún valor de la clave es NULL y todas las notas están en [0, 100].</li><li><b>(b)</b> Refuta como clave: {cedula} (V-10 se repite), {curso} (Electricidad), {periodo}, {nota} (80), {cedula, curso} (V-10, Electricidad), {curso, periodo} (Electricidad, 2026-1), {curso, nota} (Electricidad, 80), {periodo, nota} (2026-1, 80) y {curso, periodo, nota} (Electricidad, 2026-1, 80) y también {cedula, periodo} (V-11, 2026-1 aparece dos veces). No refuta {cedula, nota}, aunque eso no prueba que sea clave: la clave sale del significado de los datos.</li><li><b>(c)</b> Clave: <code>('V-10', 'Electricidad', '2026-1', 50)</code> repite la clave. Entidad: <code>(NULL, 'Soldadura', '2026-2', 60)</code>. Dominio: <code>('V-12', 'Soldadura', '2026-1', 120)</code>.</li><li>Consejo del parcial: siempre muestra tablas con tuplas concretas; una respuesta solo teórica se puede considerar incompleta.</li></ul>"
+  },
+  {
+    id: "e5", part: "Parte 5 · ER → relacional + restricciones", title: "Hoteles: traduce, enumera y traduce 3",
+    prompt: "ER: HOTEL(nombre, direccion, ciudad, estrellas) fuerte. HABITACION débil de HOTEL (clave parcial numero). TIPO_HAB(nombre_tipo, tarifa_simple, tarifa_doble) débil de HOTEL. HABITACION (1,1) — es_de — (0,N) TIPO_HAB. CLIENTE(cedula, nombre, {telefonos}). RESERVA(id, fecha_ingreso, fecha_salida) con CLIENTE (0,N) — hace — (1,1) RESERVA y RESERVA (1,N) — asigna — (0,N) HABITACION. Traduce al relacional, enumera las restricciones y escribe 3 en LPO.",
+    sol: "<p><b>Relaciones</b> (PK subrayada con _ )</p><ul><li>HOTEL(<u>nombre</u>, direccion, ciudad, estrellas)</li><li>TIPO_HAB(<u>hotel, nombre_tipo</u>, tarifa_simple, tarifa_doble) · hotel FK → HOTEL</li><li>HABITACION(<u>hotel, numero</u>, tipo NOT NULL) · hotel FK → HOTEL · (hotel, tipo) FK → TIPO_HAB</li><li>CLIENTE(<u>cedula</u>, nombre)</li><li>TELEFONO_CLIENTE(<u>cedula, telefono</u>) · cedula FK → CLIENTE</li><li>RESERVA(<u>id</u>, fecha_ingreso, fecha_salida, cedula NOT NULL) · cedula FK → CLIENTE</li><li>ASIGNA(<u>id_reserva, hotel, numero</u>) · id_reserva FK → RESERVA · (hotel, numero) FK → HABITACION</li></ul><p><b>Restricciones a enumerar</b></p><ol><li>Unicidad de cada PK (una por relación).</li><li>Integridad referencial de cada FK (7 FK).</li><li>NOT NULL de HABITACION.tipo y RESERVA.cedula (vienen de mín = 1).</li><li>Toda reserva aparece al menos una vez en ASIGNA (mín = 1 de la M:N).</li><li>El tipo de una habitación es del mismo hotel que la habitación (la FK compuesta lo garantiza al compartir la columna hotel).</li><li>fecha_salida > fecha_ingreso.</li><li>1 ≤ estrellas ≤ 5.</li><li>tarifa_doble &lt; tarifa_simple.</li></ol><p><b>Tres en LPO</b></p><ul><li><code>(∀r | r ∈ RESERVA : r.fecha_salida > r.fecha_ingreso)</code></li><li><code>(∀r | r ∈ RESERVA : (∃a | a ∈ ASIGNA : a.id_reserva = r.id))</code></li><li><code>(∀h | h ∈ HOTEL : 1 ≤ h.estrellas ∧ h.estrellas ≤ 5)</code></li></ul>"
+  },
+  {
+    id: "e6", part: "Parte 6 · Modelar un enunciado", title: "Notaría: ER + 5 restricciones",
+    prompt: "Con el ejercicio 6 de la Práctica ER (Notaría), dibuja el ERE y nombra las restricciones que vayas encontrando. Mínimo 5, en lenguaje natural; escribe 2 en LPO.",
+    sol: "<p><b>Estructuras clave</b></p><ul><li>ESTADO fuerte; MUNICIPIO débil de ESTADO; NOTARIA débil de MUNICIPIO (clave parcial nombre).</li><li>PERSONA(<u>documento</u>, nombres, apellidos, nacionalidad, direccion, telefono).</li><li>DOCUMENTO_NOTARIAL con clave compuesta (numero_libro, folio_inicial), folio_final, fecha, monto. Otorgado en una NOTARIA.</li><li>BIEN especializado <b>d, total</b> en INMUEBLE(<u>codigo_catastral</u>, direccion, uso) y VEHICULO(<u>placa</u>, <u>serial_motor</u>, <u>serial_carroceria</u>, marca, modelo, color, anio): tres claves candidatas subrayadas.</li><li>Interrelación del documento con los actores: compra, vende (PERSONA (0,N), DOCUMENTO (1,N)), da_fe con el NOTARIO y autentica con el ABOGADO (cada uno (1,1) desde el documento). Notario y abogado pueden modelarse como especialización solapada de PERSONA.</li></ul><p><b>Restricciones</b></p><ol><li>folio_final ≥ folio_inicial.</li><li>monto > 0.</li><li>uso del inmueble ∈ {'vivienda', 'local comercial'}.</li><li>Un mismo bien no puede ser vendido por el mismo propietario en dos documentos distintos sin haberlo comprado de nuevo entre ellos (prevención de fraude).</li><li>Quien vende un bien en un documento no es comprador en ese mismo documento.</li></ol><p><b>Dos en LPO</b></p><ul><li><code>(∀d | d ∈ DOCUMENTO : d.folioFinal ≥ d.folioInicial)</code></li><li><code>¬(∃v, c | v ∈ vende ∧ c ∈ compra : v[DOCUMENTO] = c[DOCUMENTO] ∧ v[PERSONA] = c[PERSONA])</code></li></ul>"
+  },
+  {
+    id: "e7", part: "Parte 3 · Traducir a cuantificadores", title: "GERES: presupuesto dentro de la cuota",
+    prompt: "Supón el ER: CENTRO débil de MUNICIPIO (rombo contiene), MUNICIPIO débil de ESTADO (rombo tiene), CENTRO (1,1) — clasificado — (0,N) NIVEL, y la interrelación regula(ESTADO, NIVEL) con atributos cuota_min y cuota_max. Escribe en LPO: «el presupuesto de cada centro está dentro de la cuota de su estado y su nivel».",
+    sol: "<p><code>(∀c, m, e, n, r | CENTRO(c) ∧ (m, c) ∈ contiene ∧ (e, m) ∈ tiene ∧ (c, n) ∈ clasificado ∧ r ∈ regula ∧ r[ESTADO] = e ∧ r[NIVEL] = n : r.cuota_min ≤ c.presupuesto ∧ c.presupuesto ≤ r.cuota_max)</code></p><p>Lectura: para cada centro c, su municipio m, el estado e de ese municipio, su nivel n y la regla r de ese estado y nivel, el presupuesto está entre las cuotas. Si «estrictamente dentro» excluye los bordes, cambia ≤ por &lt;; aclara tu interpretación.</p><p>«Todo estado tiene límites para cada nivel y todo nivel en cada estado» es otra restricción: <code>(∀e, n | ESTADO(e) ∧ NIVEL(n) : (∃!₁ r | r ∈ regula : r[ESTADO] = e ∧ r[NIVEL] = n))</code></p>"
+  },
+  {
+    id: "e8", part: "Parte 7 · Tablas «¿qué ocurre?»", title: "Practica en el laboratorio",
+    prompt: "Esta parte se practica mejor en el Laboratorio → «¿Qué ocurre?», con tres bases de ejemplo y 30 operaciones. Para cada operación responde antes de mirar: ¿repite clave?, ¿deja NULL algo obligatorio?, ¿cumple los CHECK?, ¿alguna FK queda colgando?",
+    sol: "<p>Método: 1) clave/UNIQUE, 2) NULL en PK o NOT NULL, 3) CHECK, 4) FK. En un DELETE, revisa quién referencia la fila y qué acción declara la FK; si hay cascada, repite el análisis en la tabla alcanzada.</p>"
+  }
+];
+
+/* ---------- Chuleta ---------- */
+window.CHEATS = [
+  { title: "Símbolos de la notación Chen", head: ["Símbolo", "Significa"], rows: [
+    ["Rectángulo", "Entidad fuerte"], ["Rectángulo doble", "Entidad débil"], ["Rombo", "Interrelación"], ["Rombo doble", "Interrelación identificante"],
+    ["Óvalo", "Atributo simple"], ["Óvalo doble", "Multivaluado"], ["Óvalo punteado", "Derivado"], ["Óvalo con hijos", "Compuesto"],
+    ["Subrayado", "Clave"], ["Subrayado punteado", "Clave parcial"], ["(min,max) junto a la entidad", "Participaciones de cada entidad de ese lado"],
+    ["Círculo d / o", "Especialización disjunta / solapada"], ["Doble línea al círculo", "Especialización total"], ["Círculo ∪", "Categoría"]
+  ] },
+  { title: "Cuantificadores", head: ["Escritura", "Lectura"], rows: [
+    ["(∀x | R : C)", "Para todo x en R se cumple C"], ["(∃x | R : C)", "Existe x en R que cumple C"], ["¬(∃x | R : C)", "(∀x | R : ¬C)"],
+    ["∃ₙ", "Al menos n"], ["∃ⁿ", "A lo más n"], ["∃!ₙ", "Exactamente n"], ["∃ₙᵐ", "Entre n y m"],
+    ["x.a.b", "Sub-atributo b del compuesto a"], ["c[E] · c[E, rol]", "Entidad de E en la instancia c (con rol)"], ["(a, b) ∈ r", "La tupla está en la interrelación r"]
+  ] },
+  { title: "Tipos de restricción", head: ["Tipo", "Dónde vive", "Ejemplo"], rows: [
+    ["Inherente", "El propio modelo", "Valores atómicos en el relacional"], ["Implícita", "Estructuras del esquema", "(1,1), claves, débiles, d/total"],
+    ["Explícita", "Aparte, en LN + LPO", "Vencimiento > activación"]
+  ] },
+  { title: "Traducción ER → relacional", head: ["Construcción", "Se traduce como"], rows: [
+    ["Entidad fuerte", "Relación; atributos simples; clave → PK"], ["Entidad débil", "PK propietario + clave parcial; FK al propietario"],
+    ["1:1", "FK en el lado total, fusión o relación cruzada"], ["1:N", "FK en el lado con máx 1 (NOT NULL si mín 1)"],
+    ["M:N", "Relación nueva, PK = ambas FK"], ["Multivaluado", "Relación (PK entidad, valor)"], ["n-aria", "Relación con todas las FK"],
+    ["Especialización", "8A super+subs · 8B solo subs (total) · 8C tipo · 8D banderas"], ["Categoría", "Clave sustituta como FK en cada superclase"]
+  ] },
+  { title: "¿Qué puede violar cada operación?", head: ["Operación", "Puede violar"], rows: [
+    ["INSERT", "Dominio/CHECK, clave/UNIQUE, entidad (PK NULL), NOT NULL, referencial (FK inexistente)"],
+    ["DELETE", "Solo referencial → NO ACTION, CASCADE, SET NULL, SET DEFAULT"],
+    ["UPDATE PK", "Como DELETE + INSERT"], ["UPDATE FK", "Referencial"], ["UPDATE otro", "Dominio, NOT NULL"]
+  ] },
+  { title: "Cualidades del esquema", head: ["Cualidad", "Idea"], rows: [
+    ["Compleción", "Universo ↔ esquema"], ["Corrección", "Sintáctica (símbolos) y semántica (binaria vs. ternaria)"], ["Minimalidad", "Cada aspecto una vez"],
+    ["Expresividad", "Natural y fácil de entender"], ["Legibilidad", "Estético, elegante"], ["Autoexplicación", "Mucho sin otros formalismos"], ["Extensibilidad", "Módulos o vistas"]
+  ] },
+  { title: "Fundamentos", head: ["Concepto", "Clave para el examen"], rows: [
+    ["SBD", "Aplicaciones + SGBD + datos + metadatos"], ["Modelo de datos", "Estructuras + restricciones + operaciones"],
+    ["Independencia física", "Conceptual ↔ interno"], ["Independencia lógica", "Externo ↔ conceptual"], ["DDL / DML / DCL", "Estructura / datos / permisos"],
+    ["No usar SGBD", "Simple y estable, tiempo real, embebido, sin multiusuario"]
+  ] }
+];
+
+/* App de estudio: ruteo por hash (#seccion-arg), progreso en localStorage, sin dependencias. */
+(function () {
+  "use strict";
+  var M = window.MODULES, view = document.getElementById("view");
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+  var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
+  var shuffle = function (a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; };
+  var byId = function (id) { return M.filter(function (m) { return m.id === id; })[0]; };
+  var pick = function (a) { return a[Math.floor(Math.random() * a.length)]; };
+
+  /* ---------- Estado persistente ---------- */
+  var KEY = "sbd-parcial1-v1";
+  function fresh() { return { xp: 0, read: {}, known: {}, wrong: {}, best: {}, ej: {} }; }
+  var S = fresh();
+  try { var raw = localStorage.getItem(KEY); if (raw) S = Object.assign(S, JSON.parse(raw)); } catch (e) {}
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} renderXp(); }
+  function addXp(n) { S.xp += n; save(); }
+  function renderXp() { $("#xp").innerHTML = "<b>" + S.xp + "</b> XP"; }
+
+  function modProgress(m) {
+    var r = m.concepts.filter(function (_, i) { return S.read[m.id + ":" + i]; }).length;
+    var k = m.cards.filter(function (_, i) { return S.known[m.id + ":" + i]; }).length;
+    var tot = m.concepts.length + m.cards.length;
+    return { pct: Math.round(((r + k) / tot) * 100), r: r, k: k };
+  }
+
+  /* ---------- Figuras: diagramas Chen y tablas ---------- */
+  function tw(s, px) { return String(s).length * px; }
+  function ent(x, y, w, h, name, weak, ext) {
+    var cls = ext ? "f-ent ext" : "f-ent";
+    var o = '<rect class="' + cls + '" x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="2"/>';
+    if (weak) o += '<rect class="' + cls + ' in" x="' + (x + 5) + '" y="' + (y + 5) + '" width="' + (w - 10) + '" height="' + (h - 10) + '" rx="1"/>';
+    return o + '<text class="f-et" x="' + (x + w / 2) + '" y="' + (y + h / 2) + '">' + esc(name) + "</text>";
+  }
+  function dia(cx, cy, w, h, name, ident) {
+    var p = function (s) { return (cx - w / 2 * s) + "," + cy + " " + cx + "," + (cy - h / 2 * s) + " " + (cx + w / 2 * s) + "," + cy + " " + cx + "," + (cy + h / 2 * s); };
+    var o = '<polygon class="f-rel" points="' + p(1) + '"/>';
+    if (ident) o += '<polygon class="f-rel in" points="' + p(0.78) + '"/>';
+    return o + '<text class="f-rt" x="' + cx + '" y="' + cy + '">' + esc(name) + "</text>";
+  }
+  function line(x1, y1, x2, y2, dbl) {
+    if (!dbl) return '<line class="f-ln" x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '"/>';
+    var dx = x2 - x1, dy = y2 - y1, L = Math.sqrt(dx * dx + dy * dy) || 1, ox = -dy / L * 2.2, oy = dx / L * 2.2;
+    return line(x1 + ox, y1 + oy, x2 + ox, y2 + oy) + line(x1 - ox, y1 - oy, x2 - ox, y2 - oy);
+  }
+  function card(x, y, s, anchor) { return '<text class="f-card" x="' + x + '" y="' + y + '" text-anchor="' + (anchor || "middle") + '">' + esc(s) + "</text>"; }
+  function svgWrap(w, h, body, label) { return '<svg class="fig-svg" viewBox="0 0 ' + w + " " + h + '" role="img" aria-label="' + esc(label) + '" style="max-width:' + w + 'px">' + body + "</svg>"; }
+
+  function figBin(f) {
+    var wa = Math.max(110, tw(f.a, 9.2) + 30), wb = Math.max(110, tw(f.b, 9.2) + 30), dw = Math.max(120, tw(f.r, 8) + 56), gap = 78, h = 46, H = 110, cy = 55;
+    var xa = 12, xd = xa + wa + gap + dw / 2, xb = xd + dw / 2 + gap, W = xb + wb + 12;
+    var o = ent(xa, cy - h / 2, wa, h, f.a, f.aw) + ent(xb, cy - h / 2, wb, h, f.b, f.bw) + dia(xd, cy, dw, 62, f.r, f.rid);
+    o = line(xa + wa, cy, xd - dw / 2, cy, f.rid && f.aw) + line(xd + dw / 2, cy, xb, cy, f.rid && f.bw) + o;
+    o += card(xa + wa + 8, cy - 10, f.ca, "start") + card(xb - 8, cy - 10, f.cb, "end");
+    return svgWrap(W, H, o, f.a + " " + f.ca + " " + f.r + " " + f.cb + " " + f.b);
+  }
+  function figTern(f) {
+    var W = 560, H = 230, cx = 280, cy = 140, o = "";
+    o += line(150, cy, cx - 70, cy) + line(cx + 70, cy, 410, cy) + line(cx, cy - 33, cx, 69);
+    o += ent(20, cy - 23, 130, 46, f.a) + ent(410, cy - 23, 130, 46, f.b) + ent(cx - 65, 23, 130, 46, f.c) + dia(cx, cy, 140, 66, f.r);
+    o += card(158, cy - 10, f.ca, "start") + card(402, cy - 10, f.cb, "end") + card(cx + 8, 90, f.cc, "start");
+    return svgWrap(W, H, o, "Ternaria " + f.r);
+  }
+  function figSpec(f) {
+    var n = f.subs.length, sw = 130, gap = 40, W = Math.max(360, n * sw + (n - 1) * gap + 40), H = 230, cx = W / 2, cy = 112, o = "";
+    var supW = Math.max(130, tw(f.sup, 9.2) + 30);
+    o += line(cx, 66, cx, cy - 18, f.total);
+    f.subs.forEach(function (s, i) {
+      var x = 20 + i * (sw + gap) + sw / 2, y = 176;
+      o += line(cx, cy, x, y);
+      var mx = (cx + x) / 2, my = (cy + y) / 2, ang = Math.atan2(cy - my, cx - mx), r = 9;
+      var a1 = ang + Math.PI / 2, a2 = ang - Math.PI / 2;
+      o += '<path class="f-sub" d="M' + (mx + r * Math.cos(a1)) + "," + (my + r * Math.sin(a1)) + " A" + r + "," + r + " 0 0 1 " + (mx + r * Math.cos(a2)) + "," + (my + r * Math.sin(a2)) + '"/>';
+      o += ent(x - sw / 2, y, sw, 44, s);
+    });
+    o += ent(cx - supW / 2, 20, supW, 46, f.sup, f.supw);
+    o += '<circle class="f-circ" cx="' + cx + '" cy="' + cy + '" r="17"/><text class="f-ct" x="' + cx + '" y="' + cy + '">' + esc(f.sym) + "</text>";
+    return svgWrap(W, H, o, "Especialización de " + f.sup);
+  }
+  function figTbl(f) {
+    var o = "";
+    if (f.ddl) o += '<pre class="ddl">' + esc(f.ddl) + "</pre>";
+    o += '<div class="tbls">' + f.tables.map(function (t) {
+      return '<div class="tbl-wrap mini-t"><table><caption>' + esc(t.n) + "</caption><thead><tr>" + t.c.map(function (c) { return "<th>" + esc(c) + "</th>"; }).join("") + "</tr></thead><tbody>" +
+        t.r.map(function (r) { return "<tr>" + r.map(function (v) { return "<td" + (v === "NULL" ? ' class="nul"' : "") + ">" + esc(v) + "</td>"; }).join("") + "</tr>"; }).join("") + "</tbody></table></div>";
+    }).join("") + "</div>";
+    return o;
+  }
+  function fig(f) {
+    if (!f) return "";
+    var inner = f.t === "bin" ? figBin(f) : f.t === "tern" ? figTern(f) : f.t === "spec" ? figSpec(f) : f.t === "tbl" ? figTbl(f) : "";
+    return '<div class="fig' + (f.t === "tbl" ? " fig-t" : "") + '">' + inner + "</div>";
+  }
+
+  /* ---------- Cuenta regresiva ---------- */
+  function tick() {
+    var ms = window.EXAM_DATE - new Date(), el = $("#clock");
+    if (ms <= 0) { el.innerHTML = "<b>¡Hoy es el parcial!</b>"; var b0 = $("#bigtime"); if (b0) b0.textContent = "¡Hoy!"; return; }
+    var d = Math.floor(ms / 864e5), h = Math.floor(ms % 864e5 / 36e5), mi = Math.floor(ms % 36e5 / 6e4);
+    el.innerHTML = "Parcial en <b>" + d + "d " + h + "h " + String(mi).padStart(2, "0") + "m</b>";
+    var big = $("#bigtime");
+    if (big) big.innerHTML = d + "<i>d</i>" + String(h).padStart(2, "0") + "<i>h</i>" + String(mi).padStart(2, "0") + "<i>m</i>";
+  }
+
+  /* ---------- Router ---------- */
+  var routes = { inicio: home, estudiar: estudiar, tarjetas: tarjetas, quiz: quiz, lab: lab, ejercicios: ejercicios, simulacro: simulacro, chuleta: chuleta };
+  var cleanup = null;
+  function go(tok) { if (location.hash === "#" + tok) route(); else location.hash = tok; }
+  function setHash(tok) { try { history.replaceState(null, "", "#" + tok); } catch (e) {} }
+  function route() {
+    if (cleanup) { cleanup(); cleanup = null; }
+    var tok = location.hash.replace(/^#\/?/, "") || "inicio", i = tok.indexOf("-");
+    var name = i < 0 ? tok : tok.slice(0, i), arg = i < 0 ? "" : tok.slice(i + 1);
+    if (!routes[name]) { name = "inicio"; arg = ""; }
+    $$("#nav a").forEach(function (a) { if (a.dataset.r === name) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
+    view.innerHTML = "";
+    var box = document.createElement("div"); box.className = "view-in"; view.appendChild(box);
+    routes[name](box, arg ? [arg] : []);
+    window.scrollTo(0, 0);
+    tick();
+  }
+  window.addEventListener("hashchange", route);
+
+  function modOptions(sel, withAll) {
+    return (withAll ? '<option value="all">Todos los temas</option>' : "") + M.map(function (m, i) {
+      return '<option value="' + m.id + '"' + (m.id === sel ? " selected" : "") + ">" + (i + 1) + ". " + esc(m.name) + "</option>";
+    }).join("");
+  }
+
+  /* ================= INICIO ================= */
+  var PARTS = [
+    ["Selección: traducir un ER a lenguaje natural", "Tema 3 y Laboratorio → Lector (min,max)", "lab-lector"],
+    ["Completar un ER", "Temas 2-4 y Ejercicio 2", "ejercicios"],
+    ["Traducir una restricción a cuantificadores", "Tema 6 y Laboratorio → Arma la fórmula", "lab-lpo"],
+    ["Desarrollo sobre tuplas, resuelto con ejemplos", "Tema 7 y Ejercicio 4", "estudiar-rel"],
+    ["ER → modelo lógico: enumerar restricciones y traducir 3", "Tema 8 y Ejercicio 5", "estudiar-mapeo"],
+    ["Modelar un enunciado nombrando ~5 restricciones", "Temas 2-6 y Ejercicio 6", "ejercicios"],
+    ["Tablas tipo SQL: ¿qué ocurre en cada caso?", "Tema 9 y Laboratorio → ¿Qué ocurre?", "lab-tablas"]
+  ];
+  var PLAN = [
+    ["Mié 21", "Fundamentos, Modelo ER y (min,max)", "fund"], ["Jue 22", "ERE, calidad del esquema y teoría de LPO", "ere"],
+    ["Vie 23", "LPO en práctica y modelo relacional / tuplas", "lpo"], ["Sáb 24", "Traducción ER → relacional y tablas «¿qué ocurre?»", "mapeo"],
+    ["Dom 25", "Ejercicios de desarrollo y simulacro cronometrado", "sim"]
+  ];
+  function home(box) {
+    var totalQ = M.reduce(function (a, m) { return a + m.quiz.length; }, 0), totalC = M.reduce(function (a, m) { return a + m.cards.length; }, 0);
+    var weakest = M.slice().sort(function (a, b) { return modProgress(a).pct - modProgress(b).pct; })[0];
+    box.innerHTML =
+      '<section class="hero"><p class="eyebrow">INFO-02012 · Prof. Marlene Goncalves</p><h1>Primer parcial de <em>Sistemas de Bases de Datos</em></h1>' +
+      '<p class="lead">' + M.length + ' temas ordenados de lo básico a lo que más pesa, ' + totalC + ' tarjetas, ' + totalQ + ' preguntas con diagramas, laboratorios y ejercicios con el formato del examen.</p>' +
+      '<div class="when"><span class="bigtime" id="bigtime"></span><span class="pill">lunes 26 oct · 1:00 p.m.</span></div>' +
+      '<div class="next-box"><p>Lo más flojo por ahora: <b>' + esc(weakest.name) + '</b> (' + modProgress(weakest).pct + '%).</p>' +
+      '<a class="btn primary" href="#estudiar-' + weakest.id + '">Estudiar este tema</a></div></section>' +
+      '<section class="parts"><h2>Cómo viene el parcial</h2><p class="sub">Según el semestre pasado. Cada parte tiene dónde practicarse aquí.</p><ol class="part-list">' +
+      PARTS.map(function (p) { return '<li><div><b>' + esc(p[0]) + "</b><small>" + esc(p[1]) + '</small></div><a class="btn mini" href="#' + p[2] + '">Practicar</a></li>'; }).join("") + "</ol></section>" +
+      '<section class="mission" aria-label="Temas"><h2>Temas</h2>' + M.map(function (m, i) {
+        var p = modProgress(m);
+        return '<div class="mrow" style="--hue-c: oklch(0.82 0.15 ' + m.hue + ')"><div><h3><span class="num">' + (i + 1) + "</span>" + esc(m.name) + "</h3><small>" + esc(m.src) + '</small><p class="bl">' + esc(m.blurb) + "</p></div>" +
+          '<div><div class="meter"><i style="width:' + p.pct + '%"></i></div><div class="mpct">' + p.pct + "% · " + p.r + "/" + m.concepts.length + " temas · " + p.k + "/" + m.cards.length + ' tarjetas</div></div>' +
+          '<div class="go"><a class="btn mini" href="#estudiar-' + m.id + '">Leer</a><a class="btn mini" href="#tarjetas-' + m.id + '">Tarjetas</a><a class="btn mini" href="#quiz-' + m.id + '">Quiz</a></div></div>';
+      }).join("") + "</section>" +
+      '<section class="tips"><h2>Plan: 2 a 3 horas por día</h2>' +
+      PLAN.map(function (p) { return '<div class="tip-line"><b>' + p[0] + "</b> " + esc(p[1]) + "</div>"; }).join("") +
+      '<div class="tip-line">En cada sesión: lee el tema y marca lo que dominas → tarjetas → quiz del tema → laboratorio. Las falladas quedan guardadas para repasar.</div></section>' +
+      '<div class="import">Tu progreso se guarda solo en este navegador. <span id="rz"><button class="btn mini danger" id="reset">Reiniciar progreso</button></span></div>';
+    $("#reset").onclick = function () {
+      $("#rz").innerHTML = '¿Seguro? <button class="btn mini danger" id="rz-y">Sí, borrar todo</button> <button class="btn mini" id="rz-n">Cancelar</button>';
+      $("#rz-y").onclick = function () { S = fresh(); save(); route(); };
+      $("#rz-n").onclick = function () { route(); };
+    };
+  }
+
+  /* ================= ESTUDIAR ================= */
+  function estudiar(box, args) {
+    var cur = byId(args[0]) || M[0], q = "";
+    box.innerHTML = '<h1>Estudiar</h1><p class="lead">Resumen de cada tema con el vocabulario de la profesora. Marca lo que ya dominas.</p>' +
+      '<div class="study"><div class="mods" id="mods"></div><div class="mcol"><div class="toolbar"><input type="search" id="q" placeholder="Buscar dentro del tema…" aria-label="Buscar"></div><div id="mbody"></div></div></div>';
+    function mods() {
+      $("#mods").innerHTML = M.map(function (m, i) {
+        var p = modProgress(m);
+        return '<button aria-pressed="' + (m.id === cur.id) + '" data-id="' + m.id + '"><span>' + (i + 1) + ". " + esc(m.name) + "</span><small>" + p.pct + '%</small><div class="meter m-meter" style="--hue-c: oklch(0.82 0.15 ' + m.hue + ')"><i style="width:' + p.pct + '%"></i></div></button>';
+      }).join("");
+      $$("#mods button").forEach(function (b) { b.onclick = function () { cur = byId(b.dataset.id); setHash("estudiar-" + cur.id); mods(); body(); }; });
+    }
+    function body() {
+      var ql = q.toLowerCase(), out = '<div class="mod-head"><h2>' + esc(cur.name) + "</h2><p>" + esc(cur.blurb) + '</p><small class="src">' + esc(cur.src) + "</small></div>";
+      var any = false;
+      cur.concepts.forEach(function (c, i) {
+        var txt = c.t + " " + c.p + " " + (c.list || []).join(" ") + " " + (c.tip || "");
+        if (ql && txt.replace(/<[^>]+>/g, "").toLowerCase().indexOf(ql) < 0) return;
+        any = true;
+        var id = cur.id + ":" + i, done = !!S.read[id];
+        out += '<article class="concept"><h3><span>' + c.t + '</span><button class="chk" data-id="' + id + '" aria-pressed="' + done + '"><svg><use href="#i-check"/></svg>' + (done ? "Dominado" : "Marcar") + "</button></h3>" +
+          '<p class="body">' + c.p + "</p>" + (c.list ? "<ul>" + c.list.map(function (x) { return "<li>" + x + "</li>"; }).join("") + "</ul>" : "") +
+          (c.tip ? '<div class="callout"><b>Ojo: </b>' + c.tip + "</div>" : "") + "</article>";
+      });
+      if (!any) out += '<div class="empty">Nada coincide con «' + esc(q) + "».</div>";
+      out += '<div class="row" style="margin-top:1.6rem"><a class="btn" href="#tarjetas-' + cur.id + '">Tarjetas del tema</a><a class="btn primary" href="#quiz-' + cur.id + '">Quiz del tema</a></div>';
+      $("#mbody").innerHTML = out;
+      $$(".chk").forEach(function (b) {
+        b.onclick = function () {
+          var id = b.dataset.id;
+          if (S.read[id]) delete S.read[id]; else { S.read[id] = 1; S.xp += 3; }
+          save(); var y = window.scrollY; mods(); body(); window.scrollTo(0, y);
+        };
+      });
+    }
+    $("#q").oninput = function (e) { q = e.target.value.trim(); body(); };
+    mods(); body();
+  }
+
+  /* ================= TARJETAS ================= */
+  function tarjetas(box, args) {
+    var st = { mod: args[0] && byId(args[0]) ? args[0] : "all", only: false, i: 0, deck: [] };
+    box.innerHTML = '<h1>Tarjetas</h1><p class="lead">Lee la pregunta, respóndela en voz alta y luego voltea la tarjeta.</p>' +
+      '<div class="setup-grid"><label class="field" for="sm">Tema<select id="sm">' + modOptions(st.mod, true) + '</select></label>' +
+      '<label class="field" for="so">Mostrar<select id="so"><option value="0">Todas</option><option value="1">Solo las que no sé</option></select></label>' +
+      '<button class="btn" id="sh">Mezclar</button></div><div id="deck"></div>';
+    function build() {
+      var d = [];
+      M.forEach(function (m) { if (st.mod !== "all" && st.mod !== m.id) return; m.cards.forEach(function (c, i) { var id = m.id + ":" + i; if (st.only && S.known[id]) return; d.push({ id: id, q: c[0], a: c[1], mod: m.name }); }); });
+      st.deck = d; st.i = 0;
+    }
+    function draw() {
+      var el = $("#deck");
+      if (!st.deck.length) { el.innerHTML = '<div class="empty" style="margin-top:1.6rem">No quedan tarjetas pendientes aquí. Cambia el filtro o repasa otro tema.</div>'; return; }
+      var c = st.deck[st.i];
+      el.innerHTML = '<div class="deck-stage"><button class="flip" id="fl" aria-pressed="false" aria-label="Voltear tarjeta"><div class="flip-in">' +
+        '<div class="face front"><span class="tag">' + esc(c.mod) + '</span><div class="big">' + esc(c.q) + '</div></div>' +
+        '<div class="face back"><span class="tag">Respuesta</span><div class="big">' + esc(c.a) + "</div></div></div></button>" +
+        '<p class="hint">Toca o pulsa <kbd>Espacio</kbd> para voltear · <kbd>←</kbd> <kbd>→</kbd> para moverte</p></div>' +
+        '<div class="deck-bar"><div class="deck-count">' + (st.i + 1) + " / " + st.deck.length + "</div>" +
+        '<div class="row"><button class="btn" id="prev">Anterior</button><button class="btn danger" id="no">Repasar</button><button class="btn primary" id="yes">La sabía</button><button class="btn" id="next">Siguiente</button></div></div>';
+      var fl = $("#fl");
+      fl.onclick = function () { fl.setAttribute("aria-pressed", fl.getAttribute("aria-pressed") === "true" ? "false" : "true"); };
+      $("#prev").onclick = function () { mv(-1); };
+      $("#next").onclick = function () { mv(1); };
+      $("#yes").onclick = function () { if (!S.known[c.id]) { S.known[c.id] = 1; addXp(5); } mv(1); };
+      $("#no").onclick = function () { delete S.known[c.id]; save(); mv(1); };
+    }
+    function mv(d) { st.i = (st.i + d + st.deck.length) % st.deck.length; draw(); }
+    function key(e) {
+      if (/INPUT|SELECT|TEXTAREA/.test(e.target.tagName) || !$("#fl")) return;
+      if (e.key === "ArrowRight") mv(1); else if (e.key === "ArrowLeft") mv(-1);
+      else if (e.key === " " && e.target.tagName !== "BUTTON") { e.preventDefault(); $("#fl").click(); }
+    }
+    document.addEventListener("keydown", key); cleanup = function () { document.removeEventListener("keydown", key); };
+    $("#sm").onchange = function (e) { st.mod = e.target.value; build(); draw(); };
+    $("#so").onchange = function (e) { st.only = e.target.value === "1"; build(); draw(); };
+    $("#sh").onclick = function () { st.deck = shuffle(st.deck); st.i = 0; draw(); };
+    build(); draw();
+  }
+
+  /* ================= QUIZ (y simulacro) ================= */
+  function pool(modId) {
+    var out = [];
+    M.forEach(function (m) { if (modId !== "all" && modId !== m.id && modId !== "wrong") return; m.quiz.forEach(function (q, i) { var id = m.id + ":" + i; if (modId === "wrong" && !S.wrong[id]) return; out.push({ id: id, mod: m.name, q: q[0], opts: q[1], why: q[2], fig: q[3] }); }); });
+    return out;
+  }
+  function prep(q) { return Object.assign({}, q, { order: shuffle(q.opts.map(function (_, i) { return i; })) }); }
+
+  function quiz(box, args) {
+    var nWrong = Object.keys(S.wrong).length, start = args[0] || "all";
+    box.innerHTML = '<h1>Quiz</h1><p class="lead">Selección simple con explicación. Varias preguntas traen diagrama o tablas, como en el parcial. Las que falles se guardan.</p>' +
+      '<div class="setup-grid"><label class="field" for="qm">Tema<select id="qm">' + modOptions(start, true) + '<option value="wrong"' + (start === "wrong" ? " selected" : "") + ">Mis falladas (" + nWrong + ")</option></select></label>" +
+      '<label class="field" for="qn">Cantidad<select id="qn"><option>10</option><option>20</option><option value="999">Todas</option></select></label>' +
+      '<button class="btn primary" id="go">Empezar</button></div><div id="qa"></div>';
+    $("#go").onclick = function () {
+      var p = shuffle(pool($("#qm").value)).slice(0, +$("#qn").value);
+      if (!p.length) { $("#qa").innerHTML = '<div class="empty" style="margin-top:1.4rem">No hay preguntas en esta selección.</div>'; return; }
+      runQuiz($("#qa"), p.map(prep), { feedback: true });
+    };
+    if (args[0]) $("#go").click();
+  }
+
+  function runQuiz(el, qs, o) {
+    var i = 0, score = 0, streak = 0, answers = [], timer = null, left = o.seconds || 0;
+    function stop() { if (timer) clearInterval(timer); }
+    cleanup = stop;
+    if (o.seconds) timer = setInterval(function () { left--; paintTimer(); if (left <= 0) { stop(); finish(); } }, 1000);
+    function paintTimer() {
+      var t = $("#tm"); if (!t) return;
+      t.textContent = String(Math.floor(left / 60)).padStart(2, "0") + ":" + String(left % 60).padStart(2, "0");
+      $("#tb").style.width = (left / o.seconds * 100) + "%";
+    }
+    function show() {
+      var q = qs[i], L = "ABCD";
+      el.innerHTML = '<div class="q-card"><div class="q-meta"><span>' + (i + 1) + " / " + qs.length + " · " + esc(q.mod) + "</span><span>" +
+        (o.seconds ? 'Tiempo <b id="tm"></b>' : '<span class="streak">Racha ' + streak + "</span>") + "</span></div>" +
+        (o.seconds ? '<div class="timer-bar"><i id="tb"></i></div>' : "") +
+        '<div class="q-text">' + esc(q.q) + "</div>" + fig(q.fig) + '<div class="opts">' + q.order.map(function (oi, k) {
+          return '<button class="opt" data-k="' + oi + '"><span class="l">' + L[k] + "</span><span>" + esc(q.opts[oi]) + "</span></button>";
+        }).join("") + '</div><div id="fb"></div><div class="row" style="margin-top:1rem"><span class="sp"></span><button class="btn" id="nx" hidden></button></div></div>';
+      if (o.seconds) paintTimer();
+      if (answers[i] != null) $$(".opt").forEach(function (b) { b.classList.toggle("picked", +b.dataset.k === answers[i]); });
+      $$(".opt").forEach(function (b) { b.onclick = function () { choose(+b.dataset.k); }; });
+      var nx = $("#nx");
+      if (!o.feedback) {
+        nx.hidden = false; nx.textContent = i === qs.length - 1 ? "Terminar" : "Siguiente"; nx.onclick = next;
+        if (i > 0) { var pv = document.createElement("button"); pv.className = "btn ghost"; pv.textContent = "Anterior"; pv.onclick = function () { i--; show(); }; nx.parentNode.insertBefore(pv, nx); }
+      }
+    }
+    function choose(k) {
+      var q = qs[i];
+      if (o.feedback) {
+        if (answers[i] != null) return;
+        answers[i] = k;
+        $$(".opt").forEach(function (b) { var v = +b.dataset.k; b.disabled = true; if (v === 0) b.classList.add("right"); else if (v === k) b.classList.add("wrong"); });
+        var ok = k === 0;
+        if (ok) { score++; streak++; S.xp += 10; delete S.wrong[q.id]; } else { streak = 0; S.wrong[q.id] = 1; }
+        save();
+        $("#fb").innerHTML = '<div class="why"><b>' + (ok ? "¡Correcto! " : "Ojo: ") + "</b>" + esc(q.why) + "</div>";
+        var nx = $("#nx"); nx.hidden = false; nx.className = "btn primary"; nx.textContent = i === qs.length - 1 ? "Ver resultado" : "Siguiente"; nx.onclick = next; nx.focus();
+      } else { answers[i] = k; $$(".opt").forEach(function (b) { b.classList.toggle("picked", +b.dataset.k === k); }); }
+    }
+    function next() { if (i === qs.length - 1) finish(); else { i++; show(); window.scrollTo(0, el.offsetTop - 80); } }
+    function finish() {
+      stop(); cleanup = null;
+      if (!o.feedback) { score = 0; qs.forEach(function (q, n) { var ok = answers[n] === 0; if (ok) { score++; delete S.wrong[q.id]; } else S.wrong[q.id] = 1; }); S.xp += score * 5; }
+      var pct = Math.round(score / qs.length * 100), nota = Math.round(score / qs.length * 20 * 10) / 10;
+      if (o.key) { S.best[o.key] = Math.max(S.best[o.key] || 0, pct); }
+      save();
+      var misses = qs.filter(function (q, n) { return answers[n] !== 0; });
+      var verdict = pct >= 85 ? "Listo para esta parte del parcial." : pct >= 65 ? "Vas bien; repasa lo fallado." : "Vuelve a leer los temas y repite.";
+      el.innerHTML = '<div class="q-card"><div class="score-big">' + pct + '<small>% · ' + score + "/" + qs.length + " · " + String(nota).replace(".", ",") + "/20</small></div><p class=\"lead\">" + verdict + "</p>" +
+        '<div class="row" style="margin-top:1.2rem"><button class="btn primary" id="again">Repetir</button>' + (misses.length ? '<button class="btn" id="retry">Repetir solo falladas (' + misses.length + ")</button>" : "") + "</div></div>" +
+        (misses.length ? '<div class="miss"><h2>Para repasar</h2>' + misses.map(function (q) {
+          var given = answers[qs.indexOf(q)];
+          return '<div class="miss-item"><b>' + esc(q.q) + "</b>" + fig(q.fig) + (given != null ? '<p class="no">Tu respuesta: ' + esc(q.opts[given]) + "</p>" : '<p class="no">Sin responder</p>') + '<p class="ok">Correcta: ' + esc(q.opts[0]) + "</p><p>" + esc(q.why) + "</p></div>";
+        }).join("") + "</div>" : "");
+      $("#again").onclick = function () { runQuiz(el, shuffle(qs).map(prep), o); };
+      if ($("#retry")) $("#retry").onclick = function () { runQuiz(el, shuffle(misses).map(prep), o); };
+    }
+    show();
+  }
+
+  /* ================= SIMULACRO ================= */
+  function simulacro(box) {
+    var best = S.best.sim;
+    box.innerHTML = '<h1>Simulacro</h1><p class="lead">30 preguntas de todos los temas, 45 minutos, sin pistas. Se corrige al final y te da la nota sobre 20. Después haz en papel dos ejercicios de desarrollo para completar el examen.</p>' +
+      (best != null ? '<p class="pill" style="margin-top:1rem">Tu mejor resultado: ' + best + "%</p>" : "") +
+      '<div class="row" style="margin-top:1.4rem" id="sr"><button class="btn primary" id="go">Comenzar simulacro</button><a class="btn" href="#ejercicios">Ver ejercicios de desarrollo</a></div><div id="qa"></div>';
+    $("#go").onclick = function () {
+      $("#sr").hidden = true;
+      var per = {}, all = shuffle(pool("all")), sel = [];
+      all.forEach(function (q) { var k = q.mod; per[k] = (per[k] || 0) + 1; if (per[k] <= 4) sel.push(q); });
+      sel = shuffle(sel).slice(0, 30);
+      runQuiz($("#qa"), sel.map(prep), { feedback: false, seconds: 45 * 60, key: "sim" });
+    };
+  }
+
+  /* ================= LABORATORIO ================= */
+  var LABS = [["lector", "Lector (min,max)"], ["clasif", "Inherente / implícita / explícita"], ["lpo", "Arma la fórmula"], ["tablas", "¿Qué ocurre?"], ["pares", "Emparejar"]];
+  function lab(box, args) {
+    var tab = args[0] && LABS.some(function (l) { return l[0] === args[0]; }) ? args[0] : "lector";
+    box.innerHTML = '<h1>Laboratorio</h1><p class="lead">Juegos cortos para las partes prácticas del parcial. Cada acierto suma XP.</p><div class="tabs" role="tablist">' +
+      LABS.map(function (l) { return '<button class="tab" role="tab" data-t="' + l[0] + '" aria-selected="' + (l[0] === tab) + '">' + l[1] + "</button>"; }).join("") + '</div><div class="lab-body" id="lb"></div>';
+    $$(".tab").forEach(function (b) { b.onclick = function () { setHash("lab-" + b.dataset.t); lab(box, [b.dataset.t]); }; });
+    ({ lector: labLector, clasif: labClas, lpo: labOrden, tablas: labTablas, pares: labPares }[tab])($("#lb"));
+  }
+
+  var CARD_TXT = { "(0,1)": "a lo sumo una vez (puede no participar)", "(1,1)": "exactamente una vez", "(0,N)": "cero o muchas veces", "(1,N)": "al menos una vez" };
+  function labLector(lb) {
+    var CS = Object.keys(CARD_TXT), good = 0, n = 0;
+    function sentence(a, ca, b, cb) { return "Cada " + a + " participa " + CARD_TXT[ca] + "; cada " + b + " participa " + CARD_TXT[cb] + "."; }
+    function ratio(ca, cb) { var ma = ca.slice(-2, -1), mb = cb.slice(-2, -1); if (ma === "1" && mb === "1") return "1:1"; if (ma === "N" && mb === "N") return "M:N"; return "1:N"; }
+    function round() {
+      var p = pick(window.LECTOR_PAIRS), ca = pick(CS), cb = pick(CS), right = sentence(p[0], ca, p[2], cb), opts = [right];
+      if (ca !== cb) opts.push(sentence(p[0], cb, p[2], ca));
+      var guard = 0;
+      while (opts.length < 4 && guard++ < 50) { var s = sentence(p[0], pick(CS), p[2], pick(CS)); if (opts.indexOf(s) < 0) opts.push(s); }
+      var order = shuffle(opts.map(function (_, i) { return i; }));
+      var fk = ca.slice(-2, -1) === "1" && cb.slice(-2, -1) === "N" ? p[0] : cb.slice(-2, -1) === "1" && ca.slice(-2, -1) === "N" ? p[2] : null;
+      var r = ratio(ca, cb);
+      var note = "En notación clásica es <b>" + r + "</b>. " + (r === "M:N" ? "Al traducir se crea una relación nueva." : r === "1:N" ? "Al traducir, la FK va en <b>" + esc(fk) + "</b>" + ((fk === p[0] ? ca : cb)[1] === "1" ? " y es NOT NULL." : " y admite NULL.") : "Al traducir, la FK va en cualquiera de los dos (mejor en el de participación total).");
+      lb.innerHTML = '<p class="hint" style="text-align:left">Ronda ' + (n + 1) + " · aciertos " + good + " · ¿qué afirma el diagrama?</p>" +
+        fig({ t: "bin", a: p[0], ca: ca, r: p[1], cb: cb, b: p[2] }) + '<div class="opts">' + order.map(function (oi, k) {
+          return '<button class="opt" data-k="' + oi + '"><span class="l">' + "ABCD"[k] + "</span><span>" + esc(opts[oi]) + "</span></button>";
+        }).join("") + '</div><div id="vd"></div>';
+      $$(".opt").forEach(function (b) {
+        b.onclick = function () {
+          var k = +b.dataset.k, ok = k === 0; n++;
+          $$(".opt").forEach(function (x) { var v = +x.dataset.k; x.disabled = true; if (v === 0) x.classList.add("right"); else if (v === k) x.classList.add("wrong"); });
+          if (ok) { good++; addXp(5); }
+          $("#vd").innerHTML = '<div class="verdict ' + (ok ? "good" : "bad") + '">' + (ok ? "¡Correcto! " : "El par se lee junto a su propia entidad. ") + note + ' <button class="btn mini" id="nx">Otra ronda</button></div>';
+          $("#nx").onclick = round; $("#nx").focus();
+        };
+      });
+    }
+    round();
+  }
+
+  function labClas(lb) {
+    var q = shuffle(window.CLASSIFY), i = 0, good = 0, labels = { inh: "Inherente", imp: "Implícita", exp: "Explícita" },
+      why = { inh: "La impone el propio modelo de datos.", imp: "Se expresa con las estructuras del esquema (el diagrama).", exp: "El diagrama no puede expresarla: va en lenguaje natural y LPO." };
+    function draw(fb) {
+      if (i >= q.length) { lb.innerHTML = '<div class="q-card"><div class="score-big">' + good + "<small>/" + q.length + '</small></div><p class="lead">Aciertos clasificando restricciones.</p><div class="row" style="margin-top:1rem"><button class="btn primary" id="rp">Jugar de nuevo</button></div></div>'; $("#rp").onclick = function () { labClas(lb); }; return; }
+      lb.innerHTML = '<p class="hint" style="text-align:left;margin-bottom:.7rem">' + (i + 1) + " / " + q.length + " · ¿Qué tipo de restricción es?</p>" +
+        '<div class="cl-item">' + esc(q[i][0]) + '</div><div class="cl-btns">' + Object.keys(labels).map(function (k) { return '<button class="btn" data-k="' + k + '">' + labels[k] + "</button>"; }).join("") + "</div>" +
+        (fb ? '<div class="verdict ' + (fb.ok ? "good" : "bad") + '">' + (fb.ok ? "¡Correcto! " : "Era " + labels[q[i][1]] + ". ") + why[q[i][1]] + ' <button class="btn mini" id="nx">Siguiente</button></div>' : "");
+      if (fb) { $$(".cl-btns .btn").forEach(function (b) { b.disabled = true; }); $("#nx").onclick = function () { i++; draw(); }; $("#nx").focus(); return; }
+      $$(".cl-btns .btn").forEach(function (b) { b.onclick = function () { var ok = b.dataset.k === q[i][1]; if (ok) { good++; addXp(5); } draw({ ok: ok }); }; });
+    }
+    draw();
+  }
+
+  function labOrden(lb) {
+    var seqs = window.LPO_BUILD, cur = seqs[0], ans = [], bag = [];
+    function reset(s) { cur = s; ans = []; bag = shuffle(cur.items); draw(); }
+    function draw(result) {
+      lb.innerHTML = '<label class="field" for="ss" style="max-width:380px">Restricción<select id="ss">' + seqs.map(function (s) { return '<option value="' + s.id + '"' + (s.id === cur.id ? " selected" : "") + ">" + esc(s.name) + "</option>"; }).join("") + "</select></label>" +
+        '<div class="mission-q" style="margin-top:1rem"><p><b>En lenguaje natural:</b> ' + esc(cur.nl) + '</p></div>' +
+        '<div class="term formula">' + (ans.length ? ans.map(function (a) { return esc(a); }).join(" ") : '<span class="faint">Toca las piezas en orden…</span>') + ' <span class="cur"></span></div>' +
+        '<ol class="seq-ans">' + cur.items.map(function (_, i) { var cls = ans[i] ? "filled" : ""; if (result) cls += ans[i] === cur.items[i] ? " ok" : " ko"; return '<li class="' + cls + '" data-i="' + i + '">' + (ans[i] ? esc(ans[i]) : "") + "</li>"; }).join("") + "</ol>" +
+        '<div class="chips seq-pool">' + bag.map(function (p, j) { return '<button class="chip mono" data-j="' + j + '">' + esc(p) + "</button>"; }).join("") + "</div>" +
+        '<div class="row" style="margin-top:1rem"><button class="btn primary" id="ck"' + (ans.length < cur.items.length ? " disabled" : "") + '>Comprobar</button><button class="btn" id="rs">Reiniciar</button></div>' +
+        (result === "ok" ? '<div class="verdict good">¡Fórmula correcta! <code>' + esc(cur.items.join(" ")) + "</code></div>" : result ? '<div class="verdict bad">Hay piezas fuera de lugar (en rojo). Recuerda: cuantificador | rango : cuerpo.</div>' : "");
+      $("#ss").onchange = function (e) { reset(seqs.filter(function (s) { return s.id === e.target.value; })[0]); };
+      $$(".seq-pool .chip").forEach(function (b) { b.onclick = function () { var j = +b.dataset.j; ans.push(bag[j]); bag.splice(j, 1); draw(); }; });
+      $$(".seq-ans li.filled").forEach(function (li) { li.onclick = function () { var i = +li.dataset.i, removed = ans.splice(i); bag = bag.concat(removed); draw(); }; });
+      $("#rs").onclick = function () { reset(cur); };
+      $("#ck").onclick = function () { var ok = ans.every(function (a, i) { return a === cur.items[i]; }); if (ok) addXp(15); draw(ok ? "ok" : "ko"); };
+    }
+    reset(cur);
+  }
+
+  function labTablas(lb) {
+    var sc = window.SCENARIOS, cur = sc[0], done = {}, good = 0, OUT = window.OUTCOMES;
+    function draw() {
+      lb.innerHTML = '<div class="chips">' + sc.map(function (s) { return '<button class="chip" aria-pressed="' + (s.id === cur.id) + '" data-s="' + s.id + '">' + esc(s.name) + "</button>"; }).join("") + "</div>" +
+        '<p class="hint" style="text-align:left;margin:.9rem 0 .4rem">Cada operación parte del <b>estado inicial</b> mostrado. Elige qué ocurre.</p>' +
+        '<details class="ddl-box" open><summary>Definición de las tablas</summary><pre class="ddl">' + esc(cur.ddl) + "</pre></details>" +
+        fig({ t: "tbl", tables: cur.tables }) +
+        '<div class="ops">' + cur.ops.map(function (op, i) {
+          var d = done[cur.id + i];
+          return '<div class="op' + (d ? (d.ok ? " good" : " bad") : "") + '"><code class="sql">' + esc(op[0]) + '</code>' +
+            (d ? '<p class="op-res">' + (d.ok ? "✓ " : "✗ Elegiste: " + esc(OUT[d.k]) + ". Correcto: ") + "<b>" + esc(OUT[op[1]]) + "</b>. " + esc(op[2]) + "</p>"
+              : '<label class="sr" for="o' + i + '">Resultado</label><select id="o' + i + '" data-i="' + i + '"><option value="">¿Qué ocurre?</option>' + Object.keys(OUT).map(function (k) { return '<option value="' + k + '">' + esc(OUT[k]) + "</option>"; }).join("") + "</select>") + "</div>";
+        }).join("") + "</div>" +
+        '<div class="row" style="margin-top:1rem"><span class="pill">Aciertos: ' + good + "</span><button class=\"btn\" id=\"rs\">Reiniciar este escenario</button></div>";
+      $$(".chip[data-s]").forEach(function (b) { b.onclick = function () { cur = sc.filter(function (s) { return s.id === b.dataset.s; })[0]; draw(); }; });
+      $$(".ops select").forEach(function (s) {
+        s.onchange = function () {
+          var i = +s.dataset.i, k = s.value; if (!k) return;
+          var ok = k === cur.ops[i][1]; done[cur.id + i] = { ok: ok, k: k }; if (ok) { good++; addXp(5); }
+          var y = window.scrollY; draw(); window.scrollTo(0, y);
+        };
+      });
+      $("#rs").onclick = function () { cur.ops.forEach(function (_, i) { delete done[cur.id + i]; }); draw(); };
+    }
+    draw();
+  }
+
+  function labPares(lb, setKey) {
+    var keys = Object.keys(window.PAIRSETS), k = setKey || keys[0], P = window.PAIRSETS[k];
+    var set = shuffle(P.pairs).slice(0, 6), left = null, right = null, done = {}, order = shuffle(set.map(function (_, i) { return i; }));
+    function draw() {
+      lb.innerHTML = '<div class="chips">' + keys.map(function (x) { return '<button class="chip" aria-pressed="' + (x === k) + '" data-p="' + x + '">' + esc(window.PAIRSETS[x].name) + "</button>"; }).join("") + "</div>" +
+        '<p class="hint" style="text-align:left;margin:.9rem 0 .8rem">Elige un término y luego su pareja.</p><div class="pairs"><div class="pairs-col">' +
+        set.map(function (p, i) { return '<button class="pair-btn' + (done[i] ? " done" : "") + (left === i ? " sel" : "") + '" data-l="' + i + '">' + esc(p[0]) + "</button>"; }).join("") + '</div><div class="pairs-col">' +
+        order.map(function (i) { return '<button class="pair-btn' + (done[i] ? " done" : "") + (right === i ? " sel" : "") + '" data-r="' + i + '">' + esc(set[i][1]) + "</button>"; }).join("") + "</div></div>" +
+        (Object.keys(done).length === set.length ? '<div class="verdict good">¡Todo emparejado! <button class="btn mini" id="rp">Otra ronda</button></div>' : "");
+      $$("[data-p]").forEach(function (b) { b.onclick = function () { labPares(lb, b.dataset.p); }; });
+      $$("[data-l]").forEach(function (b) { b.onclick = function () { left = +b.dataset.l; tryPair(); }; });
+      $$("[data-r]").forEach(function (b) { b.onclick = function () { right = +b.dataset.r; tryPair(); }; });
+      if ($("#rp")) $("#rp").onclick = function () { labPares(lb, k); };
+    }
+    function tryPair() {
+      if (left == null || right == null) return draw();
+      if (left === right) { done[left] = 1; addXp(5); left = right = null; draw(); }
+      else { var l = left, r = right; left = right = null; draw(); [$("[data-l='" + l + "']"), $("[data-r='" + r + "']")].forEach(function (x) { x.classList.add("bad"); setTimeout(function () { x.classList.remove("bad"); }, 450); }); }
+    }
+    draw();
+  }
+
+  /* ================= EJERCICIOS ================= */
+  function ejercicios(box) {
+    var E = window.EJERCICIOS;
+    box.innerHTML = '<h1>Ejercicios de desarrollo</h1><p class="lead">Con el formato del parcial. Resuélvelos en papel, con lápiz y cronómetro, y luego abre la solución para corregirte.</p>' +
+      '<div class="ej-list">' + E.map(function (e) {
+        var st = S.ej[e.id];
+        return '<article class="ej" id="ej-' + e.id + '"><p class="eyebrow">' + esc(e.part) + '</p><h3>' + esc(e.title) + (st ? ' <span class="pill ' + (st === "ok" ? "p-ok" : "p-rep") + '">' + (st === "ok" ? "Me salió" : "Repasar") + "</span>" : "") + "</h3>" +
+          '<p class="body">' + esc(e.prompt) + "</p>" + fig(e.fig) +
+          '<details class="sol"><summary>Ver solución</summary><div class="sol-in">' + e.sol + '</div><div class="row" style="margin-top:.9rem"><button class="btn mini" data-ok="' + e.id + '">Me salió</button><button class="btn mini danger" data-rep="' + e.id + '">Repasar</button></div></details></article>';
+      }).join("") + "</div>";
+    $$("[data-ok]").forEach(function (b) { b.onclick = function () { if (S.ej[b.dataset.ok] !== "ok") S.xp += 20; S.ej[b.dataset.ok] = "ok"; save(); var y = window.scrollY; ejercicios(box); window.scrollTo(0, y); }; });
+    $$("[data-rep]").forEach(function (b) { b.onclick = function () { S.ej[b.dataset.rep] = "rep"; save(); var y = window.scrollY; ejercicios(box); window.scrollTo(0, y); }; });
+  }
+
+  /* ================= CHULETA ================= */
+  function chuleta(box) {
+    box.innerHTML = '<h1>Chuleta</h1><p class="lead">Lo que más cae, en tablas. Para el repaso del domingo en la noche.</p>' +
+      '<div class="toolbar" style="margin-top:1.2rem"><input type="search" id="cq" placeholder="Filtrar tablas…" aria-label="Filtrar"></div><div id="ct"></div>';
+    function draw(q) {
+      var out = "", ql = (q || "").toLowerCase();
+      window.CHEATS.forEach(function (t) {
+        var text = (t.title + " " + t.head.join(" ") + " " + t.rows.map(function (r) { return r.join(" "); }).join(" ")).toLowerCase();
+        if (ql && text.indexOf(ql) < 0) return;
+        out += '<section class="cheat"><h2>' + esc(t.title) + '</h2><div class="tbl-wrap"><table><thead><tr>' + t.head.map(function (h) { return "<th>" + esc(h) + "</th>"; }).join("") + "</tr></thead><tbody>" +
+          t.rows.map(function (r) { return "<tr>" + r.map(function (c) { return "<td>" + esc(c) + "</td>"; }).join("") + "</tr>"; }).join("") + "</tbody></table></div></section>";
+      });
+      $("#ct").innerHTML = out || '<div class="empty" style="margin-top:1rem">Sin resultados.</div>';
+    }
+    $("#cq").oninput = function (e) { draw(e.target.value.trim()); };
+    draw();
+  }
+
+  /* ---------- Arranque ---------- */
+  $$("#nav a").forEach(function (a) { a.addEventListener("click", function (e) { e.preventDefault(); go(a.dataset.r); }); });
+  renderXp(); setInterval(tick, 30000);
+  route();
+})();
+
+</script>
+</body></html>
